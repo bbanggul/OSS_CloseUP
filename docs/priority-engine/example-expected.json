@@ -1,0 +1,108 @@
+{
+  "schema_version": "priority-io-v2",
+  "scan_id": "00000000-0000-4000-8000-000000000001",
+  "priority_rule_version": "priority-v1",
+  "security_status": "completed",
+  "link_results": [
+    {
+      "finding_id": "00000000-0000-4000-8000-000000000201",
+      "package_id": "00000000-0000-4000-8000-000000000101",
+      "priority": "P1",
+      "priority_status": "calculated",
+      "has_fix_candidate": false,
+      "priority_rule_version": "priority-v1",
+      "package_name": "example-package",
+      "installed_version": "1.0.0",
+      "fix_information": "not_reported",
+      "fixed_version_candidates": [],
+      "finding_context": {
+        "severity": "HIGH"
+      },
+      "link_evidence": {}
+    },
+    {
+      "finding_id": "00000000-0000-4000-8000-000000000202",
+      "package_id": "00000000-0000-4000-8000-000000000101",
+      "priority": "P2",
+      "priority_status": "calculated",
+      "has_fix_candidate": true,
+      "priority_rule_version": "priority-v1",
+      "package_name": "example-package",
+      "installed_version": "1.0.0",
+      "fix_information": "candidates_available",
+      "fixed_version_candidates": [
+        {
+          "source_tool": "trivy",
+          "advisory_id": "EXAMPLE-002",
+          "value": "1.1.0",
+          "kind": "tool_expression",
+          "raw": "1.1.0",
+          "test_only": true
+        }
+      ],
+      "finding_context": {
+        "severity": "MEDIUM"
+      },
+      "link_evidence": {}
+    },
+    {
+      "finding_id": "00000000-0000-4000-8000-000000000203",
+      "package_id": "00000000-0000-4000-8000-000000000101",
+      "priority": null,
+      "priority_status": "severity_unknown",
+      "has_fix_candidate": false,
+      "priority_rule_version": "priority-v1",
+      "package_name": "example-package",
+      "installed_version": "1.0.0",
+      "fix_information": "not_reported",
+      "fixed_version_candidates": [],
+      "finding_context": {
+        "severity": "UNKNOWN"
+      },
+      "link_evidence": {}
+    }
+  ],
+  "package_results": [
+    {
+      "package_id": "00000000-0000-4000-8000-000000000101",
+      "priority": "P1",
+      "priority_status": "calculated",
+      "representative_finding_ids": [
+        "00000000-0000-4000-8000-000000000201"
+      ],
+      "has_fix_candidate_at_priority": false,
+      "unknown_finding_count": 1,
+      "incomplete": false,
+      "package_name": "example-package",
+      "installed_version": "1.0.0",
+      "representative_links": [
+        {
+          "finding_id": "00000000-0000-4000-8000-000000000201",
+          "package_id": "00000000-0000-4000-8000-000000000101",
+          "priority": "P1",
+          "priority_status": "calculated",
+          "has_fix_candidate": false,
+          "priority_rule_version": "priority-v1",
+          "package_name": "example-package",
+          "installed_version": "1.0.0",
+          "fix_information": "not_reported",
+          "fixed_version_candidates": [],
+          "finding_context": {
+            "severity": "HIGH"
+          },
+          "link_evidence": {}
+        }
+      ]
+    }
+  ],
+  "unmapped_finding_ids": [],
+  "test_only": true,
+  "summary": {
+    "finding_count": 3,
+    "unknown_finding_count": 1,
+    "package_count": 1,
+    "affected_package_count": 1,
+    "unknown_package_count": 1,
+    "link_count": 3
+  }
+}

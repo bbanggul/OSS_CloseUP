@@ -1,0 +1,65 @@
+{
+  "schema_version": "priority-io-v2",
+  "scan_id": "00000000-0000-4000-8000-000000000001",
+  "security_status": "completed",
+  "tool_status": {
+    "trivy": {
+      "status": "completed"
+    },
+    "osv": {
+      "status": "completed"
+    }
+  },
+  "packages": [
+    {
+      "package_id": "00000000-0000-4000-8000-000000000101",
+      "name": "example-package",
+      "installed_version": "1.0.0",
+      "relationship": "direct"
+    }
+  ],
+  "findings": [
+    {
+      "finding_id": "00000000-0000-4000-8000-000000000201",
+      "severity": "HIGH"
+    },
+    {
+      "finding_id": "00000000-0000-4000-8000-000000000202",
+      "severity": "MEDIUM"
+    },
+    {
+      "finding_id": "00000000-0000-4000-8000-000000000203",
+      "severity": "UNKNOWN"
+    }
+  ],
+  "finding_packages": [
+    {
+      "finding_id": "00000000-0000-4000-8000-000000000201",
+      "package_id": "00000000-0000-4000-8000-000000000101",
+      "fix_information": "not_reported",
+      "fixed_version_candidates": []
+    },
+    {
+      "finding_id": "00000000-0000-4000-8000-000000000202",
+      "package_id": "00000000-0000-4000-8000-000000000101",
+      "fix_information": "candidates_available",
+      "fixed_version_candidates": [
+        {
+          "source_tool": "trivy",
+          "advisory_id": "EXAMPLE-002",
+          "value": "1.1.0",
+          "kind": "tool_expression",
+          "raw": "1.1.0",
+          "test_only": true
+        }
+      ]
+    },
+    {
+      "finding_id": "00000000-0000-4000-8000-000000000203",
+      "package_id": "00000000-0000-4000-8000-000000000101",
+      "fix_information": "not_reported",
+      "fixed_version_candidates": []
+    }
+  ],
+  "test_only": true
+}

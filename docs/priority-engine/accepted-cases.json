@@ -1,0 +1,733 @@
+{
+  "review_date": "2026-10-18",
+  "scope": "D01-D06 approved; D07 cases are unchanged compatibility checks, not persistence validation",
+  "cases": [
+    {
+      "id": "B01",
+      "original_input": {
+        "severity": "CRITICAL",
+        "is_direct": true,
+        "fix_status": "reported"
+      },
+      "proposed_expected": {
+        "severity": "CRITICAL",
+        "priority": "P0",
+        "priority_status": "calculated",
+        "has_fix_candidate": true,
+        "fix_information": "candidates_available",
+        "priority_rule_version": "priority-v1",
+        "incomplete": false,
+        "display_before": [
+          "B02",
+          "S01"
+        ]
+      },
+      "decision_ids": [
+        "D01",
+        "D04"
+      ]
+    },
+    {
+      "id": "B02",
+      "original_input": {
+        "severity": "CRITICAL",
+        "is_direct": false,
+        "fix_status": "not_reported"
+      },
+      "proposed_expected": {
+        "severity": "CRITICAL",
+        "priority": "P0",
+        "priority_status": "calculated",
+        "has_fix_candidate": false,
+        "fix_information": "not_reported",
+        "priority_rule_version": "priority-v1",
+        "incomplete": false,
+        "display_after": [
+          "B01",
+          "S02"
+        ],
+        "display_before_severity": "HIGH"
+      },
+      "decision_ids": [
+        "D01",
+        "D04"
+      ]
+    },
+    {
+      "id": "B03",
+      "original_input": {
+        "project_license": "MIT",
+        "dependency_license": "GPL-3.0"
+      },
+      "proposed_expected": {
+        "license_status": "확인 필요",
+        "legal_violation_assertion": false,
+        "raw_license": "GPL-3.0",
+        "project_license": "MIT",
+        "security_priority_effect": "none"
+      },
+      "decision_ids": [
+        "D05"
+      ]
+    },
+    {
+      "id": "B04",
+      "original_input": {
+        "as_of": "2026-09-27T00:00:00Z",
+        "last_commit_at": "2026-01-27T00:00:00Z",
+        "archived": false,
+        "github_status": "ok",
+        "last_release_at": null
+      },
+      "proposed_expected": {
+        "maintenance_status": "Facts only",
+        "display_label": "활동 정보",
+        "archived": false,
+        "commit_elapsed_days": 243,
+        "last_commit_at": "2026-01-27T00:00:00Z",
+        "as_of": "2026-09-27T00:00:00Z",
+        "last_release_at": null,
+        "release_display": "정보 없음",
+        "automatic_risk_classification": false,
+        "security_priority_effect": "none"
+      },
+      "decision_ids": [
+        "D03"
+      ]
+    },
+    {
+      "id": "S01",
+      "original_input": {
+        "severity": "CRITICAL",
+        "is_direct": true,
+        "fix_status": "not_reported"
+      },
+      "proposed_expected": {
+        "severity": "CRITICAL",
+        "priority": "P0",
+        "priority_status": "calculated",
+        "has_fix_candidate": false,
+        "fix_information": "not_reported",
+        "priority_rule_version": "priority-v1",
+        "incomplete": false,
+        "display_after": [
+          "B01",
+          "S02"
+        ]
+      },
+      "decision_ids": [
+        "D01",
+        "D04"
+      ]
+    },
+    {
+      "id": "S02",
+      "original_input": {
+        "severity": "CRITICAL",
+        "is_direct": false,
+        "fix_status": "reported"
+      },
+      "proposed_expected": {
+        "severity": "CRITICAL",
+        "priority": "P0",
+        "priority_status": "calculated",
+        "has_fix_candidate": true,
+        "fix_information": "candidates_available",
+        "priority_rule_version": "priority-v1",
+        "incomplete": false,
+        "same_grade_as": "B01",
+        "display_before": [
+          "B02",
+          "S01"
+        ]
+      },
+      "decision_ids": [
+        "D01",
+        "D04"
+      ]
+    },
+    {
+      "id": "S03",
+      "original_input": {
+        "severity": "MEDIUM",
+        "is_direct": true,
+        "fix_status": "reported"
+      },
+      "proposed_expected": {
+        "severity": "MEDIUM",
+        "priority": "P2",
+        "priority_status": "calculated",
+        "has_fix_candidate": true,
+        "fix_information": "candidates_available",
+        "priority_rule_version": "priority-v1",
+        "incomplete": false,
+        "display_before": [
+          "S04",
+          "S06"
+        ]
+      },
+      "decision_ids": [
+        "D01",
+        "D04"
+      ]
+    },
+    {
+      "id": "S04",
+      "original_input": {
+        "severity": "MEDIUM",
+        "is_direct": true,
+        "fix_status": "not_reported"
+      },
+      "proposed_expected": {
+        "severity": "MEDIUM",
+        "priority": "P2",
+        "priority_status": "calculated",
+        "has_fix_candidate": false,
+        "fix_information": "not_reported",
+        "priority_rule_version": "priority-v1",
+        "incomplete": false,
+        "display_after": [
+          "S03",
+          "S05"
+        ]
+      },
+      "decision_ids": [
+        "D01",
+        "D04"
+      ]
+    },
+    {
+      "id": "S05",
+      "original_input": {
+        "severity": "MEDIUM",
+        "is_direct": false,
+        "fix_status": "reported"
+      },
+      "proposed_expected": {
+        "severity": "MEDIUM",
+        "priority": "P2",
+        "priority_status": "calculated",
+        "has_fix_candidate": true,
+        "fix_information": "candidates_available",
+        "priority_rule_version": "priority-v1",
+        "incomplete": false,
+        "display_before": [
+          "S04",
+          "S06"
+        ]
+      },
+      "decision_ids": [
+        "D01",
+        "D04"
+      ]
+    },
+    {
+      "id": "S06",
+      "original_input": {
+        "severity": "MEDIUM",
+        "is_direct": false,
+        "fix_status": "not_reported"
+      },
+      "proposed_expected": {
+        "severity": "MEDIUM",
+        "priority": "P2",
+        "priority_status": "calculated",
+        "has_fix_candidate": false,
+        "fix_information": "not_reported",
+        "priority_rule_version": "priority-v1",
+        "incomplete": false,
+        "display_after": [
+          "S03",
+          "S05"
+        ]
+      },
+      "decision_ids": [
+        "D01",
+        "D04"
+      ]
+    },
+    {
+      "id": "S07",
+      "original_input": {
+        "raw_severity": "MODERATE",
+        "is_direct": true,
+        "fix_status": "reported"
+      },
+      "proposed_expected": {
+        "severity": "MEDIUM",
+        "priority": "P2",
+        "priority_status": "calculated",
+        "has_fix_candidate": true,
+        "fix_information": "candidates_available",
+        "priority_rule_version": "priority-v1",
+        "incomplete": false,
+        "raw_severity": "MODERATE"
+      },
+      "decision_ids": [
+        "D01",
+        "D04",
+        "D02"
+      ]
+    },
+    {
+      "id": "S08",
+      "original_input": {
+        "raw_severity": null,
+        "is_direct": true,
+        "fix_status": "reported"
+      },
+      "proposed_expected": {
+        "severity": "UNKNOWN",
+        "priority": null,
+        "priority_status": "severity_unknown",
+        "has_fix_candidate": true,
+        "fix_information": "candidates_available",
+        "priority_rule_version": "priority-v1",
+        "incomplete": false,
+        "raw_severity": null,
+        "finding_count": 1,
+        "unknown_finding_count": 1,
+        "display_group": "심각도 확인 필요",
+        "candidate_affects_sort": false,
+        "representative_finding_ids": [],
+        "has_fix_candidate_at_priority": false
+      },
+      "decision_ids": [
+        "D01",
+        "D04",
+        "D02",
+        "D06"
+      ]
+    },
+    {
+      "id": "S09",
+      "original_input": {
+        "severity": "HIGH",
+        "is_direct": true,
+        "fixed_version": null,
+        "fixed_version_candidates": [
+          "0.31.1",
+          "1.15.2"
+        ],
+        "fixed_version_state": "multiple_or_constraint_values_preserved"
+      },
+      "proposed_expected": {
+        "severity": "HIGH",
+        "priority": "P1",
+        "priority_status": "calculated",
+        "has_fix_candidate": true,
+        "fix_information": "candidates_available",
+        "priority_rule_version": "priority-v1",
+        "incomplete": false,
+        "fixed_version": null,
+        "fixed_version_candidates": [
+          "0.31.1",
+          "1.15.2"
+        ],
+        "has_reported_fix": true,
+        "recommended_upgrade_generated": false
+      },
+      "decision_ids": [
+        "D01",
+        "D04"
+      ]
+    },
+    {
+      "id": "S10",
+      "original_input": {
+        "severity": "HIGH",
+        "fixed_version": null,
+        "fixed_version_candidates": [
+          ">=4.17.19"
+        ]
+      },
+      "proposed_expected": {
+        "severity": "HIGH",
+        "priority": "P1",
+        "priority_status": "calculated",
+        "has_fix_candidate": true,
+        "fix_information": "candidates_available",
+        "priority_rule_version": "priority-v1",
+        "incomplete": false,
+        "relationship": "unknown",
+        "fixed_version": null,
+        "fixed_version_candidates": [
+          ">=4.17.19"
+        ],
+        "has_reported_fix": true,
+        "raw_constraint_preserved": ">=4.17.19",
+        "recommended_upgrade_generated": false,
+        "preserve_existing_manual_review": true
+      },
+      "decision_ids": [
+        "D01",
+        "D04"
+      ]
+    },
+    {
+      "id": "L01",
+      "original_input": {
+        "dependency_licenses_to_test_individually": [
+          "MIT",
+          "Apache-2.0",
+          "BSD-3-Clause",
+          "ISC"
+        ]
+      },
+      "proposed_expected": {
+        "each_license_status": {
+          "MIT": "일반",
+          "Apache-2.0": "일반",
+          "BSD-3-Clause": "일반",
+          "ISC": "일반"
+        },
+        "legal_compliance_guarantee": false,
+        "security_priority_effect": "none"
+      },
+      "decision_ids": [
+        "D05"
+      ]
+    },
+    {
+      "id": "L02",
+      "original_input": {
+        "dependency_licenses_to_test_individually": [
+          "GPL-2.0",
+          "AGPL-3.0",
+          "LGPL-3.0"
+        ]
+      },
+      "proposed_expected": {
+        "each_license_status": {
+          "GPL-2.0": "확인 필요",
+          "AGPL-3.0": "확인 필요",
+          "LGPL-3.0": "확인 필요"
+        },
+        "legal_violation_assertion": false,
+        "security_priority_effect": "none"
+      },
+      "decision_ids": [
+        "D05"
+      ]
+    },
+    {
+      "id": "L03",
+      "original_input": {
+        "dependency_license": null
+      },
+      "proposed_expected": {
+        "license_status": "확인 필요",
+        "reason_code": "license_missing",
+        "raw_license": null,
+        "security_priority_effect": "none"
+      },
+      "decision_ids": [
+        "D05"
+      ]
+    },
+    {
+      "id": "L04",
+      "original_input": {
+        "dependency_license": "LicenseRef-Custom"
+      },
+      "proposed_expected": {
+        "license_status": "확인 필요",
+        "reason_code": "license_not_in_policy",
+        "raw_license": "LicenseRef-Custom",
+        "raw_license_preserved": true,
+        "security_priority_effect": "none"
+      },
+      "decision_ids": [
+        "D05"
+      ]
+    },
+    {
+      "id": "L05",
+      "original_input": {
+        "expressions_to_test_individually": [
+          "MIT OR GPL-3.0-only",
+          "MIT AND GPL-3.0-only"
+        ]
+      },
+      "proposed_expected": {
+        "expression_results": [
+          {
+            "raw": "MIT OR GPL-3.0-only",
+            "operator": "OR",
+            "operands": [
+              "MIT",
+              "GPL-3.0-only"
+            ],
+            "license_status": "확인 필요",
+            "reason_code": "alternative_selection_review",
+            "automatic_selection": null
+          },
+          {
+            "raw": "MIT AND GPL-3.0-only",
+            "operator": "AND",
+            "operands": [
+              "MIT",
+              "GPL-3.0-only"
+            ],
+            "license_status": "확인 필요",
+            "reason_code": "combined_terms_review",
+            "automatic_selection": null
+          }
+        ],
+        "raw_expression_preserved": true,
+        "must_not_flatten": true,
+        "security_priority_effect": "none"
+      },
+      "decision_ids": [
+        "D05"
+      ]
+    },
+    {
+      "id": "M01",
+      "original_input": {
+        "archived": true,
+        "github_status": "ok",
+        "last_commit_age": "1일"
+      },
+      "proposed_expected": {
+        "maintenance_status": "Archived",
+        "archived": true,
+        "last_commit_age": "1일",
+        "automatic_risk_classification": false,
+        "security_priority_effect": "none"
+      },
+      "decision_ids": [
+        "D03"
+      ]
+    },
+    {
+      "id": "M02",
+      "original_input": {
+        "github_status": "unavailable",
+        "archived": null,
+        "last_commit_at": null
+      },
+      "proposed_expected": {
+        "maintenance_status": "Unknown",
+        "display_label": "확인 불가",
+        "github_status": "unavailable",
+        "archived": null,
+        "last_commit_at": null,
+        "automatic_risk_classification": false,
+        "security_priority_effect": "none"
+      },
+      "decision_ids": [
+        "D03"
+      ]
+    },
+    {
+      "id": "M03",
+      "original_input": {
+        "github_status": "ok",
+        "archived": false,
+        "last_commit_age": "1일",
+        "last_release_age": "1일"
+      },
+      "proposed_expected": {
+        "maintenance_status": "Facts only",
+        "display_label": "활동 정보",
+        "archived": false,
+        "last_commit_age": "1일",
+        "last_release_age": "1일",
+        "automatic_risk_classification": false,
+        "security_priority_effect": "none"
+      },
+      "decision_ids": [
+        "D03"
+      ]
+    },
+    {
+      "id": "M04",
+      "original_input": {
+        "as_of": "고정 시각",
+        "github_status": "ok",
+        "archived": false,
+        "last_commit_age_variants": [
+          "T - 1초",
+          "T",
+          "T + 1초"
+        ],
+        "T": "팀이 정할 활동 저조 임계값"
+      },
+      "proposed_expected": {
+        "variants": [
+          {
+            "age": "T - 1초",
+            "maintenance_status": "Facts only"
+          },
+          {
+            "age": "T",
+            "maintenance_status": "Facts only"
+          },
+          {
+            "age": "T + 1초",
+            "maintenance_status": "Facts only"
+          }
+        ],
+        "threshold_enabled": false,
+        "T": null,
+        "automatic_risk_classification": false,
+        "security_priority_effect": "none"
+      },
+      "decision_ids": [
+        "D03"
+      ]
+    },
+    {
+      "id": "M05",
+      "original_input": {
+        "github_status": "ok",
+        "archived": false,
+        "last_commit_age": "8개월",
+        "last_release_age": "1일"
+      },
+      "proposed_expected": {
+        "maintenance_status": "Facts only",
+        "display_label": "활동 정보",
+        "archived": false,
+        "last_commit_age": "8개월",
+        "last_release_age": "1일",
+        "automatic_risk_classification": false,
+        "security_priority_effect": "none"
+      },
+      "decision_ids": [
+        "D03"
+      ]
+    },
+    {
+      "id": "X01",
+      "original_input": {
+        "before": {
+          "severity": "HIGH",
+          "license": "MIT",
+          "maintenance": "Active"
+        },
+        "after": {
+          "severity": "HIGH",
+          "license": "GPL-3.0",
+          "maintenance": "Archived"
+        },
+        "is_direct": true,
+        "fix_status": "reported"
+      },
+      "proposed_expected": {
+        "before": {
+          "severity": "HIGH",
+          "priority": "P1",
+          "license_status": "일반",
+          "maintenance": "Active"
+        },
+        "after": {
+          "severity": "HIGH",
+          "priority": "P1",
+          "license_status": "확인 필요",
+          "maintenance": "Archived"
+        },
+        "no_single_combined_risk_score": true,
+        "priority_status": "calculated",
+        "has_fix_candidate": true,
+        "maintenance_input_is_preclassified_fixture": true
+      },
+      "decision_ids": [
+        "D01",
+        "D05",
+        "D03"
+      ]
+    },
+    {
+      "id": "X02",
+      "original_input": {
+        "finding_priorities": [
+          "가장 긴급",
+          "덜 긴급"
+        ],
+        "package": "동일 패키지"
+      },
+      "proposed_expected": {
+        "concretized_finding_priorities": [
+          "P0",
+          "P2"
+        ],
+        "package_priority": "P0",
+        "priority_status": "calculated",
+        "representative_count": 1
+      },
+      "decision_ids": [
+        "D06"
+      ]
+    },
+    {
+      "id": "X03",
+      "original_input": {
+        "trivy_status": "failed",
+        "osv_status": "failed",
+        "findings": []
+      },
+      "proposed_expected": {
+        "security_status": "failed",
+        "priority": null,
+        "priority_status": "unavailable",
+        "incomplete": true,
+        "finding_count": 0,
+        "display_label": "검사 실패·확인 불가",
+        "must_not_claim": [
+          "취약점 없음",
+          "안전"
+        ]
+      },
+      "decision_ids": [
+        "D07"
+      ]
+    },
+    {
+      "id": "X04",
+      "original_input": {
+        "trivy_status": "failed",
+        "osv_status": "ok",
+        "osv_finding": {
+          "severity": "HIGH"
+        }
+      },
+      "proposed_expected": {
+        "security_status": "partial",
+        "severity": "HIGH",
+        "priority": "P1",
+        "priority_status": "calculated",
+        "incomplete": true,
+        "failed_tool_visible": true,
+        "failed_tool": "trivy",
+        "finding_count": 1
+      },
+      "decision_ids": [
+        "D07",
+        "D01"
+      ]
+    },
+    {
+      "id": "X05",
+      "original_input": {
+        "scan_status": "completed",
+        "findings": []
+      },
+      "proposed_expected": {
+        "security_status": "completed",
+        "priority": null,
+        "priority_status": "no_findings",
+        "incomplete": false,
+        "finding_count": 0,
+        "display_label": "탐지 0건",
+        "synthetic_low_finding": false,
+        "safety_guarantee": false
+      },
+      "decision_ids": [
+        "D06",
+        "D07"
+      ]
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 import json
+from copy import deepcopy
 import hashlib
 from pathlib import Path
 from uuid import uuid4
@@ -19,8 +20,15 @@ def test_real_fixture_reproduced():
     for name in ('package.json','package-lock.json'):
         assert hashlib.sha256((sample/name).read_bytes()).hexdigest()==expected['execution_manifest']['inputs'][name]['sha256']
     actual=normalize_results(package,lock,expected['raw_results'],expected['tool_status'],scan_id=expected['scan_id'])
+    # D02 adds metadata without changing the recorded scanner evidence.
+    legacy = deepcopy(actual)
+    for f in legacy['findings']:
+        assert f.pop('priority_input_eligible') is True
+        for observation in f['severity_observations']:
+            status = observation.pop('normalization_status')
+            assert status == ('missing' if observation['raw'] in (None, '') else 'supported')
     for key in ('packages','findings','alias_groups','summary'):
-        assert actual[key]==expected[key]
+        assert legacy[key]==expected[key]
     assert actual['summary']['raw_records']==105
     assert len({e['record_id'] for f in actual['findings'] for e in f['evidence']})==105
     for f in actual['findings']:

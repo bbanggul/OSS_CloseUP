@@ -1,0 +1,35 @@
+{
+  "source_artifact": "output/OSS_CloseUP_정규화회귀검증_2026-10-09/NSWG-ECO-516.json",
+  "note": "Recorded Trivy advisory from prior local scan; no live rescan.",
+  "raw_record": {
+    "VulnerabilityID": "NSWG-ECO-516",
+    "PkgID": "lodash@4.17.15",
+    "PkgName": "lodash",
+    "PkgIdentifier": {
+      "PURL": "pkg:npm/lodash@4.17.15",
+      "UID": "aaf68ea380d52b8"
+    },
+    "InstalledVersion": "4.17.15",
+    "FixedVersion": ">=4.17.19",
+    "Status": "fixed",
+    "SeveritySource": "nodejs-security-wg",
+    "PrimaryURL": "https://www.npmjs.com/advisories/1523",
+    "DataSource": {
+      "ID": "nodejs-security-wg",
+      "Name": "Node.js Ecosystem Security Working Group",
+      "URL": "https://github.com/nodejs/security-wg"
+    },
+    "Fingerprint": "sha256:e598a33ada2dcd801c6214c310a9430d296e925d52da1aadfc970d9a1a85ce57",
+    "Title": "Allocation of Resources Without Limits or Throttling",
+    "Description": "Prototype pollution attack (lodash)",
+    "Severity": "HIGH",
+    "VendorSeverity": {
+      "nodejs-security-wg": 3
+    },
+    "References": [
+      "https://github.com/lodash/lodash/pull/4759",
+      "https://hackerone.com/reports/712065",
+      "https://www.npmjs.com/advisories/1523"
+    ]
+  }
+}

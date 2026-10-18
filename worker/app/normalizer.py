@@ -10,6 +10,14 @@ from pathlib import Path
 SEVERITIES = ['UNKNOWN', 'LOW', 'MEDIUM', 'HIGH', 'CRITICAL']
 
 
+def _severity_status(value):
+    if value is None or value == '':
+        return 'missing'
+    if isinstance(value, str) and value.upper() in (*SEVERITIES, 'MODERATE'):
+        return 'supported'
+    return 'unsupported'
+
+
 def _id(kind, *parts):
     value = json.dumps(parts, sort_keys=True, ensure_ascii=False)
     return kind + '_' + hashlib.sha256(value.encode()).hexdigest()[:24]
@@ -100,7 +108,8 @@ def _records(tool, data):
                      'advisory_id': _text(advisory_id, 'advisory id'),
                      'identifiers': sorted(set(identifiers)),
                      'severity': {'source_tool': tool, 'source': severity_source,
-                                  'raw': raw_severity, 'normalized': _severity(raw_severity)},
+                                  'raw': raw_severity, 'normalized': _severity(raw_severity),
+                                  'normalization_status': _severity_status(raw_severity)},
                      'fixes': fixes, 'pointer': pointer,
                      'evidence': {'source_tool': tool, 'json_pointer': pointer,
                                   'raw': deepcopy(raw), 'context': deepcopy(context)}})
@@ -246,6 +255,9 @@ def normalize_results(package, lock, tool_results, tool_status, *, scan_id):
         if not matches:
             reasons.append('package_not_found_in_lock')
         observations = [s['severity'] for s in sources]
+        eligible = all(s['normalization_status'] != 'unsupported' for s in observations)
+        if not eligible:
+            reasons.append('unsupported_severity_label')
         severity_values = {s['normalized'] for s in observations}
         # Conservative display policy, separate from priority; retain all original observations.
         severity = max(severity_values, key=SEVERITIES.index)
@@ -262,6 +274,7 @@ def normalize_results(package, lock, tool_results, tool_status, *, scan_id):
                          'identifiers': identifiers, 'source_tools': sorted({s['tool'] for s in sources}),
                          'severity': severity, 'severity_observations': observations,
                          'severity_conflict': len(severity_values - {'UNKNOWN'}) > 1,
+                         'priority_input_eligible': eligible,
                          'fixed_version_candidates': [fix for s in sources for fix in s['fixes']],
                          'fix_information': 'candidates_available' if any(s['fixes'] for s in sources) else 'not_reported',
                          'evidence': [s['evidence'] for s in sources],
