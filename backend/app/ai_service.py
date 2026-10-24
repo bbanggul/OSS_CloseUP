@@ -11,7 +11,7 @@ from .ai_generation import (MAX_ATTEMPTS, MAX_ITEMS, PROMPT_VERSION, GenerationE
                             allowed_reasons, call_model, config, fingerprint, render_output)
 
 
-def snapshot_for(conn, scan_id, finding_id=None):
+def snapshot_for(conn, scan_id, finding_id=None, package=None):
     with conn.cursor(row_factory=dict_row) as cur:
         cur.execute("SELECT status,tool_status FROM scan_runs WHERE scan_id=%s", (scan_id,))
         scan = cur.fetchone()
@@ -46,7 +46,7 @@ def snapshot_for(conn, scan_id, finding_id=None):
         if len(items) > 20000:
             raise HTTPException(413, "전체 보고서의 처리 한도(패키지 연결 20,000개)를 초과했습니다.")
         from .ai_narrative import snapshot_for_report
-        return snapshot_for_report(conn, scan_id, scan, tools, items, priority_state, priority_result)
+        return snapshot_for_report(conn, scan_id, scan, tools, items, priority_state, priority_result, package)
     if not items:
         raise HTTPException(404, "이 검사에서 해당 취약점을 찾을 수 없습니다.")
     if len(items) > MAX_ITEMS:
@@ -58,10 +58,22 @@ def snapshot_for(conn, scan_id, finding_id=None):
             "scope_note": "All package links of one selected finding; not the entire scan."}
 
 
-def generate(scan_id: UUID, finding_id: UUID | None = None):
-    scope = "finding" if finding_id else "scan_report"
+def package_key(package):
+    return f"{package[0]}@{package[1]}" if package else None
+
+
+def parse_package_key(key):
+    name, _, version = (key or '').rpartition('@')
+    return (name, version) if name and version else None
+
+
+def generate(scan_id: UUID, finding_id: UUID | None = None, package: tuple | None = None):
+    scope = "finding" if finding_id else "package" if package else "scan_report"
     from .ai_narrative import VERSION
     prompt_version = PROMPT_VERSION if finding_id else VERSION
+    key = package_key(package)
+    # package_key exists only after db/oss_closeup_v2_3_ai_package.sql; other scopes keep the old SQL.
+    key_sql = " AND package_key=%s" if package else ""
     # Session lock survives the commit that makes the running state visible.
     # A dedicated connection is closed at exit, releasing the lock even on error.
     with connect() as conn:
@@ -73,13 +85,14 @@ def generate(scan_id: UUID, finding_id: UUID | None = None):
             # A single stable snapshot, including authoritative tool statuses.
             conn.commit()
             conn.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ")
-            snapshot = snapshot_for(conn, scan_id, finding_id) if finding_id else snapshot_for(conn, scan_id)
+            snapshot = snapshot_for(conn, scan_id, finding_id) if finding_id else snapshot_for(conn, scan_id, package=package)
             digest = fingerprint(snapshot)
             if not snapshot["items"]:
                 raise HTTPException(409, "저장된 검사 항목이 없어 AI 설명을 생성하지 않습니다. 검사 상태를 확인하세요.")
             with conn.cursor(row_factory=dict_row) as cur:
                 cur.execute("""SELECT * FROM ai_analyses WHERE scan_id=%s AND scope=%s
-                               AND finding_id IS NOT DISTINCT FROM %s::uuid AND prompt_version=%s ORDER BY attempt_no DESC LIMIT 1""", (scan_id, scope, finding_id, prompt_version))
+                               AND finding_id IS NOT DISTINCT FROM %s::uuid AND prompt_version=%s""" + key_sql +
+                            " ORDER BY attempt_no DESC LIMIT 1", (scan_id, scope, finding_id, prompt_version, *([key] if package else [])))
                 previous = cur.fetchone()
                 if previous and previous["status"] == "succeeded" and previous["input_fingerprint"] == digest:
                     return previous
@@ -87,7 +100,7 @@ def generate(scan_id: UUID, finding_id: UUID | None = None):
                 cur.execute("""UPDATE ai_analyses SET status='failed', error_code='interrupted',
                                started_at=COALESCE(started_at,created_at), finished_at=clock_timestamp()
                                WHERE scan_id=%s AND scope=%s AND finding_id IS NOT DISTINCT FROM %s::uuid
-                               AND status IN ('pending','running')""", (scan_id, scope, finding_id))
+                               AND status IN ('pending','running')""" + key_sql, (scan_id, scope, finding_id, *([key] if package else [])))
                 attempt = previous["attempt_no"] + 1 if previous else 1
                 if attempt > MAX_ATTEMPTS:
                     raise HTTPException(429, "이 설명에서 생성 시도 3회를 사용했습니다. 서버 기록을 확인하세요.")
@@ -101,11 +114,14 @@ def generate(scan_id: UUID, finding_id: UUID | None = None):
                     model_payload(snapshot, model)
                 except GenerationError:
                     raise HTTPException(413, "설명 입력 크기를 초과했습니다.") from None
-                cur.execute("""INSERT INTO ai_analyses(scan_id,scope,finding_id,status,attempt_no,provider,model,
-                               prompt_version,input_fingerprint,input_snapshot,started_at)
-                               VALUES (%s,%s,%s,'running',%s,'openai',%s,%s,%s,%s,now())
-                               RETURNING analysis_id""",
-                            (scan_id, scope, finding_id, attempt, model, prompt_version, digest, Jsonb(snapshot)))
+                columns = "scan_id,scope,finding_id,status,attempt_no,provider,model,prompt_version,input_fingerprint,input_snapshot,started_at"
+                values = "%s,%s,%s,'running',%s,'openai',%s,%s,%s,%s,now()"
+                params = [scan_id, scope, finding_id, attempt, model, prompt_version, digest, Jsonb(snapshot)]
+                if package:
+                    columns += ",package_key"
+                    values += ",%s"
+                    params.append(key)
+                cur.execute(f"INSERT INTO ai_analyses({columns}) VALUES ({values}) RETURNING analysis_id", tuple(params))
                 analysis_id = cur.fetchone()["analysis_id"]
             conn.commit()
             usage = {}
@@ -117,9 +133,9 @@ def generate(scan_id: UUID, finding_id: UUID | None = None):
                 output = render_output(snapshot, selected)
                 validation = {"evidence_ids": True, "order": True, "allowed_reasons": True,
                               "renderer": "reviewed Korean sentences; no unrestricted model prose"}
-                if snapshot.get("layout") == "narrative-v3":
-                    validation = {"evidence_ids": True, "primary_anchor": True, "section_order": True,
-                                  "renderer": "AI narrative with validated references; semantic claims require evidence review"}
+                if snapshot.get("layout") == "package-v1":
+                    validation = {"evidence_ids": True, "order": True, "forbidden_terms": True,
+                                  "renderer": "server-written package facts; model writes plain-language risk sentences only"}
                 status = "succeeded"
             except GenerationError as exc:
                 code = exc.code
@@ -145,7 +161,7 @@ def stale_report(scan_id, row):
     if not row or row["status"] != "succeeded":
         return False
     from .ai_narrative import VERSION
-    if row.get("scope") == "scan_report" and row["prompt_version"] != VERSION:
+    if row.get("scope") in ("scan_report", "package") and row["prompt_version"] != VERSION:
         return True
     if row["prompt_version"] == "scan-evidence-v1":
         return True
@@ -154,7 +170,11 @@ def stale_report(scan_id, row):
     with connect() as conn:
         conn.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ")
         try:
-            return fingerprint(snapshot_for(conn, scan_id, row.get("finding_id"))) != row["input_fingerprint"]
+            if row.get("scope") == "package":
+                current = snapshot_for(conn, scan_id, package=parse_package_key(row.get("package_key")))
+            else:
+                current = snapshot_for(conn, scan_id, row.get("finding_id"))
+            return fingerprint(current) != row["input_fingerprint"]
         except HTTPException as exc:
             if exc.status_code == 409:
                 return True

@@ -5,9 +5,11 @@
 - succeeded일 때만 본문(output)을 내보낸다. failed/rejected는 사유 코드만 보여준다.
 - 검사 사실(심각도·우선순위·수정 후보)은 여기서 다루지 않는다.
 """
+import re
 from uuid import UUID
 
 from fastapi import APIRouter, HTTPException
+from psycopg import errors
 from psycopg.rows import dict_row
 
 from .db import connect
@@ -143,3 +145,42 @@ def ai_findings(scan_id: UUID):
     for row in _load_findings(scan_id):
         items.append({"finding_id": str(row["finding_id"]), **_present(row)})
     return {"scan_id": str(scan_id), "total": len(items), "items": items}
+
+
+# 패키지 단위 설명(패키지 상세 화면). 이름에 @scope/가 들어갈 수 있어 쿼리 문자열로 받는다.
+NPM_NAME = re.compile(r'^(@[a-z0-9][a-z0-9._~-]*/)?[a-z0-9][a-z0-9._~-]*$')
+VERSION_TEXT = re.compile(r'^[0-9A-Za-z.+-]{1,64}$')
+MIGRATION_HINT = "패키지 설명 저장을 위해 DB에 db/oss_closeup_v2_3_ai_package.sql을 적용해야 합니다."
+
+
+def _package(name: str, version: str):
+    if len(name) > 214 or not NPM_NAME.match(name) or not VERSION_TEXT.match(version):
+        raise HTTPException(422, "패키지 이름이나 버전 형식이 올바르지 않습니다.")
+    return (name, version)
+
+
+@router.get("/scans/{scan_id}/ai/package")
+def ai_package(scan_id: UUID, name: str, version: str):
+    from .ai_service import package_key, stale_report
+    package = _package(name, version)
+    _require_scan(scan_id)
+    try:
+        with connect() as conn, conn.cursor(row_factory=dict_row) as cur:
+            cur.execute("""SELECT * FROM ai_analyses WHERE scan_id=%s AND scope='package' AND package_key=%s
+                           ORDER BY created_at DESC,attempt_no DESC LIMIT 1""", (scan_id, package_key(package)))
+            row = cur.fetchone()
+    except errors.UndefinedColumn:
+        raise HTTPException(503, MIGRATION_HINT) from None
+    body = {"status": "stale"} if stale_report(scan_id, row) else _present(row)
+    return {"scan_id": str(scan_id), "package": {"name": name, "version": version}, **body}
+
+
+@router.post("/scans/{scan_id}/ai/package")
+def generate_ai_package(scan_id: UUID, name: str, version: str):
+    from .ai_service import generate
+    package = _package(name, version)
+    try:
+        row = generate(scan_id, package=package)
+    except (errors.UndefinedColumn, errors.CheckViolation):
+        raise HTTPException(503, MIGRATION_HINT) from None
+    return {"scan_id": str(scan_id), "package": {"name": name, "version": version}, **_present(row)}

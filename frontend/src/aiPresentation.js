@@ -13,7 +13,7 @@ export function matchesAiGroup(finding, key) {
 }
 
 export function currentAiData(data, findingId) {
-  if (!findingId && data?.status === 'succeeded' && data.output?.layout !== 'narrative-v3') {
+  if (!findingId && data?.status === 'succeeded' && data.output?.layout !== 'package-v1') {
     return { status: 'stale', message: '새 우선 확인 보고서 형식으로 보고서를 다시 생성해 주세요.' }
   }
   return data

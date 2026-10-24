@@ -1,58 +1,30 @@
-const HEADINGS = {
-  priority: '우선 확인 사항',
-  related: '관련 취약점',
-  action: '조치 방향',
-  uncertainty: '판단에 필요한 정보',
-}
+import { findingLabel } from './display'
 
-function RelatedFindings({ findings, onFinding }) {
-  const groups = new Map()
-  for (const item of findings) {
-    const key = `${item.package_name}@${item.installed_version}`
-    if (!groups.has(key)) groups.set(key, [])
-    groups.get(key).push(item)
-  }
-  return <div className="oc-report-related-list">{[...groups].map(([label, items]) => (
-    <div key={label}>
-      <p className="oc-report-package-label">{label} <span>· {items.length}건</span></p>
-      <ul>{items.map((item) => <li key={item.finding_id}>
-        <button type="button" className="oc-report-text-link" disabled={!onFinding} onClick={() => onFinding?.(item.finding_id)}>
-          {item.advisories?.find((source) => source.title)?.title || '취약점 상세'}
-        </button>
-      </li>)}</ul>
-    </div>
-  ))}</div>
-}
-
-export default function AiNarrativeReport({ output, onFinding }) {
-  const evidence = new Map((output.evidence || []).map((item) => [item.evidence_id, item]))
-  const primary = (output.evidence || []).find((item) => item.finding_id === output.primary_finding_id)
-  const sections = Object.keys(HEADINGS).map((kind) => ({
-    kind,
-    paragraphs: (output.paragraphs || []).filter((paragraph) => paragraph.kind === kind),
-  })).filter((section) => section.paragraphs.length)
+// Package-first report: 무엇을(what) → 왜(why) → 어떻게 들어왔나(path) → 어떻게 고치나(fix).
+// what·path·fix are server-written facts; only why comes from the model.
+export default function AiNarrativeReport({ output, onFinding, onPackage, hideFindingList = false }) {
+  const pkg = output.package || {}
+  const findings = output.findings || []
+  const order = ['what', 'why', 'path', 'fix']
+  const paragraphs = order.flatMap((kind) => (output.paragraphs || []).filter((p) => p.kind === kind))
   return (
     <div className="oc-ai-narrative">
-      {sections.map(({ kind, paragraphs }) => {
-        const references = [...new Set(paragraphs.flatMap((paragraph) => paragraph.evidence_ids))]
-          .map((id) => evidence.get(id)).filter(Boolean)
-        const findings = [...new Map(references.map((item) => [item.finding_id, item])).values()]
-        const body = <>
-          {kind === 'related' && <RelatedFindings findings={findings} onFinding={onFinding} />}
-          {paragraphs.map((paragraph, index) => <p className="oc-report-body" key={index}>{paragraph.text}</p>)}
-        </>
-        return (
-          <section className="oc-report-section" key={kind}>
-            <h3>{HEADINGS[kind]}</h3>
-            {kind === 'priority' && <button type="button" className="oc-report-primary-link" disabled={!onFinding} onClick={() => onFinding?.(output.primary_finding_id)}>
-              {primary?.package_name || '우선 항목'} <span aria-hidden="true">→</span>
-            </button>}
-            {kind === 'related' && (findings.length > 2 || paragraphs.length > 1)
-              ? <details className="oc-report-related-more"><summary>관련 취약점 {findings.length}건 펼쳐보기</summary>{body}</details>
-              : body}
-          </section>
-        )
-      })}
+      <section className="oc-report-section">
+        <h3>{output.title || '우선 확인 사항'}</h3>
+        {onPackage && <button type="button" className="oc-report-primary-link" onClick={() => onPackage(pkg.name, pkg.version)}>
+          {pkg.name} {pkg.version} <span aria-hidden="true">→</span>
+        </button>}
+        {paragraphs.map((p, i) => <p className="oc-report-body" key={`${p.kind}-${i}`}>{p.text}</p>)}
+        {!hideFindingList && findings.length > 0 && <details className="oc-report-related-more">
+          <summary>이 패키지의 취약점 {findings.length}건 보기</summary>
+          <ul className="oc-report-related-list">{findings.map((f) => <li key={f.finding_id}>
+            <button type="button" className="oc-report-text-link" disabled={!onFinding} onClick={() => onFinding?.(f.finding_id)}>
+              {f.title || findingLabel({ identifiers: f.identifiers }) || '취약점 상세'}
+            </button>
+            <span className="muted"> · {f.severity}{f.fix_version ? ` · 수정 버전 ${f.fix_version}` : ''}</span>
+          </li>)}</ul>
+        </details>}
+      </section>
     </div>
   )
 }

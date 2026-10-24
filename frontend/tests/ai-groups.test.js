@@ -35,7 +35,7 @@ test('old report prose is hidden but individual explanations remain readable', (
   assert.equal(currentAiData(old, 'finding-1'), old)
   const grouped = { status: 'succeeded', output: { layout: 'grouped-v2', groups: [] } }
   assert.equal(currentAiData(grouped).status, 'stale')
-  const narrative = { status: 'succeeded', output: { layout: 'narrative-v3', paragraphs: [] } }
+  const narrative = { status: 'succeeded', output: { layout: 'package-v1', paragraphs: [] } }
   assert.equal(currentAiData(narrative), narrative)
 })
 
