@@ -189,15 +189,26 @@ export function findingLabel(item) {
 }
 
 // ── 주소(#) 기반 화면 위치: 새로고침·뒤로 가기·주소 공유용 ──
-const ROUTE = /^#\/scan\/([0-9a-fA-F-]{36})(?:\/finding\/([0-9a-fA-F-]{36})|\/(findings|licenses|maintenance|packages))?$/
+const ROUTE = /^#\/scan\/([0-9a-fA-F-]{36})(?:\/finding\/([0-9a-fA-F-]{36})|\/package\/([^/]+)|\/(findings|licenses|maintenance|packages))?$/
+
+// 패키지 주소는 '이름@버전'을 인코딩해 쓴다(@scope/name도 한 칸에 들어가도록).
+export function packageFromKey(key) {
+  let text
+  try { text = decodeURIComponent(key || '') } catch { return null }
+  const at = text.lastIndexOf('@')
+  return at > 0 && at < text.length - 1 ? { name: text.slice(0, at), version: text.slice(at + 1) } : null
+}
 
 export function parseRoute(hash) {
   const m = ROUTE.exec(hash || '')
-  return m ? { scanId: m[1], findingId: m[2] || null, ...(m[3] ? { section: m[3] } : {}) } : { scanId: null, findingId: null }
+  if (!m) return { scanId: null, findingId: null }
+  const pkg = m[3] ? packageFromKey(m[3]) : null
+  return { scanId: m[1], findingId: m[2] || null, ...(pkg ? { pkg } : {}), ...(m[4] ? { section: m[4] } : {}) }
 }
 
-export function routeHash(scanId, findingId, section = 'first') {
+export function routeHash(scanId, findingId, section = 'first', pkg = null) {
   if (!scanId) return ''
+  if (pkg) return `#/scan/${scanId}/package/${encodeURIComponent(`${pkg.name}@${pkg.version}`)}`
   return findingId ? `#/scan/${scanId}/finding/${findingId}` : `#/scan/${scanId}${section !== 'first' && ['findings', 'licenses', 'maintenance', 'packages'].includes(section) ? `/${section}` : ''}`
 }
 

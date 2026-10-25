@@ -19,6 +19,11 @@ export OPENAI_MODEL OPENAI_API_KEY
 override=$(mktemp)
 trap 'rm -f -- "$override"; unset OPENAI_API_KEY OPENAI_MODEL' EXIT
 printf 'services:\n  %s:\n    environment:\n      OPENAI_API_KEY: ${OPENAI_API_KEY:?}\n      OPENAI_MODEL: ${OPENAI_MODEL:?}\n' "$service" > "$override"
-docker compose -f docker-compose.yml -f "$override" up -d --build "$service"
+# .env 의 COMPOSE_FILE(예: 배포용 docker-compose.prod.yml 포함)을 그대로 이어서 사용
+files="${COMPOSE_FILE:-$(grep -E '^COMPOSE_FILE=' .env 2>/dev/null | tail -1 | cut -d= -f2- | tr -d "\"'")}"
+args=()
+IFS=: read -r -a list <<< "${files:-docker-compose.yml}"
+for f in "${list[@]}"; do [[ -n "$f" ]] && args+=(-f "$f"); done
+docker compose "${args[@]}" -f "$override" up -d --build "$service"
 echo '설정을 전달했습니다. 화면의 AI 설명 생성 버튼으로 검사 1건을 확인하세요.'
 echo '나중에 기본 compose 명령으로 컨테이너를 다시 만들면 설정이 사라질 수 있습니다. 이 스크립트를 다시 실행하세요.'

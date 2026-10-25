@@ -58,7 +58,7 @@ def test_raw_success_is_partial(tmp_path,monkeypatch):
     monkeypatch.setattr(w,'store_packages',lambda *a,**kw: {})
     monkeypatch.setattr(w,'collect_maintenance',lambda *a,**kw: {})
     monkeypatch.setattr(w,'store_findings',lambda *a,**kw: {})
-    monkeypatch.setattr(w,'run_tool',lambda *a:'completed')
+    monkeypatch.setattr(w,'run_tools',lambda *a:['completed']*3)
     c=MagicMock();w.process(c,{'scan_id':'s','attempt_count':1})
     assert c.execute.call_args.args[1][0]=='partial'
 
@@ -70,6 +70,68 @@ def test_all_failed(tmp_path,monkeypatch):
     monkeypatch.setattr(w,'store_packages',lambda *a,**kw: {})
     monkeypatch.setattr(w,'collect_maintenance',lambda *a,**kw: {})
     monkeypatch.setattr(w,'store_findings',lambda *a,**kw: {})
-    monkeypatch.setattr(w,'run_tool',lambda *a:'failed')
+    monkeypatch.setattr(w,'run_tools',lambda *a:['failed']*3)
     c=MagicMock();w.process(c,{'scan_id':'s','attempt_count':1})
     assert c.execute.call_args.args[1][0]=='failed'
+
+
+class MainThreadConn:
+    """Fake connection that records which threads touched the DB."""
+    def __init__(self):
+        self.threads=set()
+    def execute(self,*a,**k):
+        self.threads.add(threading.current_thread().name)
+        return MagicMock()
+    def transaction(self):
+        import contextlib
+        self.threads.add(threading.current_thread().name)
+        return contextlib.nullcontext()
+
+
+def _sleep_spec(name,out,seconds,code=0):
+    body=f"import json,time;time.sleep({seconds});json.dump({{}},open(r'{out/(name+'.json')}','w'));raise SystemExit({code})"
+    return (name,[sys.executable,'-c',body],[('raw_result',name+'.json')],{0,1})
+
+
+def test_scanners_run_concurrently_and_db_stays_on_main_thread(tmp_path,monkeypatch):
+    monkeypatch.setattr(w,'OUTPUT_ROOT',tmp_path)
+    monkeypatch.setattr(w.subprocess,'run',lambda *a,**k:MagicMock(stdout='v'))
+    marked=[];monkeypatch.setattr(w.vuln_db,'mark_downloaded',lambda d,n:marked.append(n))
+    c=MainThreadConn()
+    specs=[_sleep_spec('trivy',tmp_path,1.2),_sleep_spec('osv',tmp_path,1.2,1),_sleep_spec('syft',tmp_path,1.2)]
+    started=w.time.monotonic()
+    states=w.run_tools(c,{'scan_id':'s','attempt_count':1},specs,tmp_path,{'trivy':False})
+    elapsed=w.time.monotonic()-started
+    assert states==['completed','completed','completed']
+    assert elapsed<2.5, elapsed          # sequential would take at least 3.6s
+    assert c.threads=={threading.main_thread().name}
+    assert marked==['trivy']             # trivy refreshed successfully; osv never touches the DB policy
+
+
+def test_failed_refresh_is_not_marked(tmp_path,monkeypatch):
+    monkeypatch.setattr(w,'OUTPUT_ROOT',tmp_path)
+    monkeypatch.setattr(w.subprocess,'run',lambda *a,**k:MagicMock(stdout='v'))
+    marked=[];monkeypatch.setattr(w.vuln_db,'mark_downloaded',lambda d,n:marked.append(n))
+    specs=[_sleep_spec('trivy',tmp_path,0.1,3),_sleep_spec('osv',tmp_path,0.1)]
+    states=w.run_tools(MagicMock(),{'scan_id':'s','attempt_count':1},specs,tmp_path,{})
+    assert states==['failed','completed'] and marked==[]
+
+
+def test_shutdown_stops_every_running_scanner(tmp_path,monkeypatch):
+    monkeypatch.setattr(w,'OUTPUT_ROOT',tmp_path)
+    monkeypatch.setattr(w.subprocess,'run',lambda *a,**k:MagicMock(stdout='v'))
+    monkeypatch.setattr(w,'STOP',threading.Event())
+    threading.Timer(0.5,w.STOP.set).start()
+    specs=[_sleep_spec(n,tmp_path,30) for n in ('trivy','osv','syft')]
+    started=w.time.monotonic()
+    with pytest.raises(InterruptedError):
+        w.run_tools(MagicMock(),{'scan_id':'s','attempt_count':1},specs,tmp_path,{})
+    assert w.time.monotonic()-started<5
+
+
+def test_commands_follow_db_refresh_policy(tmp_path):
+    fresh={x[0]:x[1] for x in w.commands(tmp_path/'lock',tmp_path,{'trivy':True})}
+    stale={x[0]:x[1] for x in w.commands(tmp_path/'lock',tmp_path,{})}
+    assert '--skip-db-update' in fresh['trivy'] and '--skip-db-update' not in stale['trivy']
+    assert fresh['osv']==stale['osv']    # OSV always queries the API
+    assert not any('offline' in a for a in fresh['osv'])

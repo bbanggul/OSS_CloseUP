@@ -119,3 +119,25 @@ def test_auth_and_limit_errors_do_not_trigger_fallback(status):
     responses=fallback_responses();responses[1]={'status':status,'error':f'http_{status}'}
     c=QueueClient(responses);m.inspect_package(c,'minimist','1.2.5')
     assert len(c.calls)==2
+
+
+def test_fetch_all_is_concurrent_and_matches_sequential(monkeypatch):
+    import threading, time
+    calls=[]
+    def fake(client,name,version):
+        time.sleep(0.3);calls.append(threading.current_thread().name)
+        return {'name':name,'version':version}
+    monkeypatch.setattr(m,'inspect_package',fake)
+    keys=[(f'p{i}','1.0.0') for i in range(8)]+[('p0','1.0.0')]
+    ticks=[]
+    started=time.monotonic()
+    out=m.fetch_all(object(),keys,lambda:ticks.append(threading.current_thread().name),workers=8)
+    assert time.monotonic()-started<1.5                   # sequential: 2.4s
+    assert out=={k:{'name':k[0],'version':k[1]} for k in keys} and len(calls)==8   # duplicates fetched once
+    assert set(ticks)=={threading.main_thread().name}
+
+
+def test_fetch_all_propagates_errors(monkeypatch):
+    def boom(*a): raise ValueError('bad')
+    monkeypatch.setattr(m,'inspect_package',boom)
+    with pytest.raises(ValueError): m.fetch_all(object(),[('a','1')])

@@ -10,6 +10,7 @@ import signal
 import subprocess
 import threading
 import time
+from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from uuid import uuid4
 
 import psycopg
@@ -20,6 +21,7 @@ from .package_storage import store_packages
 from .maintenance import collect as collect_maintenance
 from .priority_storage import evaluate_scan
 from .priority_stage import PriorityStagePersistenceError
+from . import vuln_db
 
 log = logging.getLogger('worker')
 STOP = threading.Event()
@@ -85,19 +87,23 @@ def verify_inputs(conn, scan_id):
     return paths
 
 
-def commands(lock, out):
+def commands(lock, out, fresh=None):
+    """fresh: {'trivy': bool}; True means Trivy uses its cached vulnerability DB without updating it.
+    OSV queries the OSV API: its offline mode re-reads the whole npm DB archive on every scan
+    (measured ~19s vs ~1s for Trivy), which is slower than the online query."""
+    fresh = fresh or {}
+    trivy_update = ['--skip-db-update', '--skip-java-db-update'] if fresh.get('trivy') else []
     return [
         ('trivy', ['trivy','fs','--scanners','vuln','--format','json','--output',str(out/'trivy.json'),
             '--cache-dir',os.getenv('TRIVY_CACHE_DIR','/cache/trivy'),'--db-repository','ghcr.io/aquasecurity/trivy-db:2',
-            '--disable-telemetry','--skip-version-check','--no-progress','--timeout','10m',str(lock)],
+            *trivy_update,'--disable-telemetry','--skip-version-check','--no-progress','--timeout','10m',str(lock)],
             [('raw_result','trivy.json')], {0}),
-        ('osv', ['osv-scanner','scan','source','-L',str(lock),'--format','json','--output-file',str(out/'osv.json')],
+        ('osv', ['osv-scanner','scan','source','-L',str(lock),
+            '--format','json','--output-file',str(out/'osv.json')],
             [('raw_result','osv.json')], {0,1}),
         ('syft', ['syft',f'file:{lock}','-o',f'syft-json={out / "syft.json"}','-o',f'spdx-json={out / "sbom.spdx.json"}','-q'],
             [('raw_result','syft.json'),('sbom','sbom.spdx.json')], {0}),
     ]
-
-
 def execute(argv, log_path, tick, timeout, stop=STOP):
     """No shell; kill the process group on timeout, shutdown, or lost DB session."""
     with log_path.open('wb') as output:
@@ -129,34 +135,85 @@ def artifact(conn, scan_id, run_id, kind, path):
         'application/json' if path.suffix=='.json' else 'text/plain'))
 
 
-def run_tool(conn, scan, name, argv, outputs, accepted, out):
-    sid=scan['scan_id'];rid=uuid4();error=None;code=None;state='failed'
-    version_cmd=[argv[0], 'version' if name=='syft' else '--version']
+def _tool_version(name, argv):
     try:
-        version=subprocess.run(version_cmd,capture_output=True,text=True,timeout=10).stdout.strip()[:1000]
-    except (OSError,subprocess.TimeoutExpired): version=None
+        return subprocess.run([argv[0], 'version' if name=='syft' else '--version'],
+                              capture_output=True,text=True,timeout=10).stdout.strip()[:1000]
+    except (OSError,subprocess.TimeoutExpired):
+        return None
+
+
+def _start_tool(conn, scan, name, argv):
+    sid=scan['scan_id'];rid=uuid4()
     conn.execute("""INSERT INTO scan_tool_runs(tool_run_id,scan_id,tool_name,attempt_no,tool_version,status,started_at)
-        VALUES(%s,%s,%s,%s,%s,'running',now())""",(rid,sid,name,scan['attempt_count'],version))
+        VALUES(%s,%s,%s,%s,%s,'running',now())""",(rid,sid,name,scan['attempt_count'],_tool_version(name,argv)))
     status(conn,sid,name,{'status':'running'})
-    logfile=out/f'{name}.log'
+    return rid
+
+
+def _run_process(name, argv, outputs, accepted, out, tick, stop=STOP):
+    """Runs one tool without touching the database. Returns (state, exit_code, error, elapsed_ms)."""
+    started=time.monotonic();error=None;code=None;state='failed'
     try:
-        code=execute(argv,logfile,lambda:heartbeat(conn,sid),TIMEOUT)
+        code=execute(argv,out/f'{name}.log',tick,TIMEOUT,stop)
         if code not in accepted: raise ValueError('tool_exit_error')
         for _,filename in outputs:
             with (out/filename).open() as f: data=json.load(f)
             if not isinstance(data,dict): raise ValueError('invalid_output_json')
         state='completed'
     except TimeoutError: state='timeout';error='tool_timeout'
-    except InterruptedError: raise
     except (OSError,ValueError): error='tool_failed_or_invalid_output'
+    return state,code,error,int((time.monotonic()-started)*1000)
+
+
+def _finish_tool(conn, scan, name, rid, outputs, out, result, extra=None):
+    sid=scan['scan_id'];state,code,error,elapsed=result
     # Keep even failed output for diagnosis; status distinguishes success from 0 findings.
     with conn.transaction():
         for kind,filename in outputs+[('log',f'{name}.log')]:
             if (out/filename).is_file(): artifact(conn,sid,rid,kind,out/filename)
         conn.execute('UPDATE scan_tool_runs SET status=%s,finished_at=now(),exit_code=%s,error_message=%s WHERE tool_run_id=%s',
             (state,code,error,rid))
-        status(conn,sid,name,{'status':state,'exit_code':code,'reason':error})
+        status(conn,sid,name,{'status':state,'exit_code':code,'reason':error,'elapsed_ms':elapsed,**(extra or {})})
     return state
+
+
+def run_tool(conn, scan, name, argv, outputs, accepted, out):
+    rid=_start_tool(conn,scan,name,argv)
+    result=_run_process(name,argv,outputs,accepted,out,lambda:heartbeat(conn,scan['scan_id']))
+    return _finish_tool(conn,scan,name,rid,outputs,out,result)
+
+
+def run_tools(conn, scan, specs, out, fresh=None):
+    """Run the scanners concurrently. Only this (main) thread uses the DB connection;
+    worker threads just run processes. Any interruption stops every child process."""
+    sid=scan['scan_id'];fresh=fresh or {}
+    started={spec[0]:_start_tool(conn,scan,spec[0],spec[1]) for spec in specs}
+    abort=threading.Event();states={}
+    pool=ThreadPoolExecutor(max_workers=len(specs))
+    try:
+        futures={pool.submit(_run_process,name,argv,outputs,accepted,out,lambda:None,abort):(name,outputs)
+                 for name,argv,outputs,accepted in specs}
+        pending=set(futures)
+        while pending:
+            done,pending=wait(pending,timeout=1,return_when=FIRST_COMPLETED)
+            if STOP.is_set(): raise InterruptedError('worker_shutdown')
+            heartbeat(conn,sid)
+            for future in done:
+                name,outputs=futures[future]
+                result=future.result()
+                db=None
+                if name=='trivy':
+                    db='cached' if fresh.get(name) else 'refreshed' if result[0]=='completed' else 'refresh_failed'
+                    if db=='refreshed':
+                        vuln_db.mark_downloaded(vuln_db.TRIVY_CACHE,name)
+                states[name]=_finish_tool(conn,scan,name,started[name],outputs,out,result,{'vulnerability_db':db} if db else None)
+    except BaseException:
+        abort.set()
+        raise
+    finally:
+        pool.shutdown(wait=True)
+    return [states[name] for name,*_ in specs]
 
 
 def process(conn, scan):
@@ -165,10 +222,12 @@ def process(conn, scan):
         paths=verify_inputs(conn,sid)
         out=OUTPUT_ROOT/str(sid)/str(scan['attempt_count'])
         out.mkdir(parents=True,exist_ok=False)
-        states=[]
-        for spec in commands(paths['package_lock'],out):
-            if STOP.is_set(): raise InterruptedError('worker_shutdown')
-            states.append(run_tool(conn,scan,*spec,out))
+        timing={}
+        mark=time.monotonic()
+        fresh=vuln_db.policy()
+        if STOP.is_set(): raise InterruptedError('worker_shutdown')
+        run_tools(conn,scan,commands(paths['package_lock'],out,fresh),out,fresh)
+        timing['scanners_ms']=int((time.monotonic()-mark)*1000);mark=time.monotonic()
         try:
             summary=store_packages(conn,sid,paths,OUTPUT_ROOT,allow_running=True)
             log.info('scan=%s package_storage=%s',sid,summary)
@@ -181,6 +240,7 @@ def process(conn, scan):
         except (OSError,ValueError,KeyError,TypeError,psycopg.IntegrityError):
             log.exception('normalization storage failed: %s',sid)
             status(conn,sid,'normalization',{'status':'failed','reason':'normalization_storage_failed'})
+        timing['storage_ms']=int((time.monotonic()-mark)*1000);mark=time.monotonic()
         try:
             result = evaluate_scan(conn, scan)
             log.info('scan=%s priority=%s', sid, result['status'])
@@ -193,6 +253,7 @@ def process(conn, scan):
                     'error_code':'PRIORITY_PERSISTENCE_FAILED'}}),sid,scan['worker_id'],scan['attempt_count']))
             if updated.rowcount != 1:
                 raise RuntimeError('priority_worker_fence_mismatch')
+        timing['priority_ms']=int((time.monotonic()-mark)*1000);mark=time.monotonic()
         def maintenance_tick():
             if STOP.is_set(): raise InterruptedError('worker_shutdown')
             heartbeat(conn,sid)
@@ -201,6 +262,9 @@ def process(conn, scan):
         except (ValueError,KeyError,TypeError,OSError):
             log.exception('maintenance failed: %s',sid)
             status(conn,sid,'github',{'status':'failed','reason':'maintenance_collection_failed'})
+        timing['maintenance_ms']=int((time.monotonic()-mark)*1000)
+        status(conn,sid,'timing',timing)
+        log.info('scan=%s timing=%s',sid,timing)
         final=finalize(conn,sid)
         conn.execute('UPDATE scan_runs SET status=%s,finished_at=now(),heartbeat_at=now(),error_message=%s WHERE scan_id=%s',
             (final,None if final=='completed' else 'incomplete_stages; see tool_status',sid))

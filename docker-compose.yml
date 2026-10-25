@@ -58,6 +58,8 @@ services:
       SCAN_RESULTS_ROOT: /work/results
       SCAN_TOOL_TIMEOUT_SECONDS: "660"
       TRIVY_CACHE_DIR: /cache/trivy
+      VULN_DB_REFRESH_SECONDS: "86400"      # Trivy 취약점 DB는 하루에 한 번만 새로 받음
+      MAINTENANCE_WORKERS: "8"              # npm·GitHub 조회 동시 개수
     volumes:
       - scan-uploads:/work/uploads:ro
       - trivy-cache:/cache/trivy             # Trivy 취약점 DB 캐시 (매번 다시 받지 않게)

@@ -22,3 +22,7 @@ node_modules/
 .idea/
 .vscode/
 sbom-*.spdx.json
+
+# 데모 배포 계정 (비밀번호 해시)
+deploy/users.caddy
+deploy/users.caddy.tmp

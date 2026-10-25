@@ -1,0 +1,29 @@
+# 데모용 공개 설정: HTTPS 자동 발급 + 팀 계정(아이디·비밀번호)만 접속
+# SITE_ADDRESS: 접속 주소 (.env). 예) 3-38-10-20.sslip.io
+{$SITE_ADDRESS} {
+	encode zstd gzip
+
+	# 계정 목록은 scripts/deploy-user.sh 가 만드는 deploy/users.caddy (git에 올리지 않음)
+	basic_auth {
+		import /etc/caddy/users.caddy
+	}
+
+	# 화면은 /api/* 로 요청하고, backend에는 /api 를 뗀 경로로 전달 (개발용 Vite 프록시와 같음)
+	handle_path /api/* {
+		reverse_proxy backend:8000
+	}
+
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "no-referrer"
+		-Server
+	}
+}

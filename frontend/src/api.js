@@ -88,3 +88,8 @@ export async function downloadSbom(scanId) {
   }
   return response.blob()
 }
+
+// 패키지 단위 AI 설명. 이름에 @scope/가 들어갈 수 있어 쿼리 문자열로 보낸다.
+const packageQuery = (name, version) => `?name=${encodeURIComponent(name)}&version=${encodeURIComponent(version)}`
+export const getAiPackage = (scanId, name, version) => request(`/scans/${scanId}/ai/package${packageQuery(name, version)}`)
+export const generateAiPackage = (scanId, name, version) => request(`/scans/${scanId}/ai/package${packageQuery(name, version)}`, { method: 'POST' })

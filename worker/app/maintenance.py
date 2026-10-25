@@ -7,6 +7,7 @@ import logging
 import os
 import re
 import time
+from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from urllib.parse import quote, urlparse, urljoin
 from urllib.request import Request, build_opener, HTTPRedirectHandler
 from urllib.error import HTTPError, URLError
@@ -17,6 +18,8 @@ from psycopg.types.json import Jsonb
 LOG=logging.getLogger(__name__)
 CACHE={}
 TTL=3600
+# npm·GitHub 조회를 동시에 몇 개까지 할지. GitHub 보조 한도를 넘지 않도록 작게 둔다.
+WORKERS=max(1,min(16,int(os.getenv('MAINTENANCE_WORKERS','8'))))
 MAX_RESPONSE=5*1024*1024
 
 
@@ -205,6 +208,26 @@ def inspect_package(client,name,version):
     return out
 
 
+def fetch_all(client,keys,tick=lambda:None,workers=None):
+    """inspect_package for each unique (name, version), several at a time. Results do not depend on order."""
+    unique=list(dict.fromkeys(keys))
+    if not unique: return {}
+    pool=ThreadPoolExecutor(max_workers=min(workers or WORKERS,len(unique)))
+    futures={pool.submit(inspect_package,client,*key):key for key in unique}
+    results={}
+    try:
+        pending=set(futures)
+        while pending:
+            done,pending=wait(pending,timeout=1,return_when=FIRST_COMPLETED)
+            tick()
+            for future in done: results[futures[future]]=future.result()
+    except BaseException:
+        pool.shutdown(wait=False,cancel_futures=True)
+        raise
+    pool.shutdown(wait=True)
+    return results
+
+
 def collect(conn,scan_id,allow_running=False,tick=lambda:None):
     acquired=conn.execute('SELECT pg_try_advisory_lock(hashtextextended(%s,1)) AS ok',(str(scan_id),)).fetchone()['ok']
     if not acquired: raise ValueError('maintenance_already_running')
@@ -214,8 +237,9 @@ def collect(conn,scan_id,allow_running=False,tick=lambda:None):
         if not allow_running and scan['status'] in ('queued','running'): raise ValueError('scan_not_finished')
         packages=conn.execute("SELECT package_id,name,installed_version FROM packages WHERE scan_id=%s AND relationship<>'root' ORDER BY lockfile_path",(scan_id,)).fetchall()
         if not packages: raise ValueError('store_packages_first')
-        client=Client(os.getenv('GITHUB_TOKEN') or None,tick)
-        counts=Counter();results={}
+        # HTTP lookups run in worker threads; only this thread touches the DB (tick = heartbeat).
+        client=Client(os.getenv('GITHUB_TOKEN') or None)
+        counts=Counter();results=fetch_all(client,[(p['name'],p['installed_version']) for p in packages],tick)
         conn.execute('UPDATE scan_runs SET tool_status=tool_status || %s WHERE scan_id=%s',
             (Jsonb({'github':{'status':'running','total':len(packages)}}),scan_id))
         columns=['repository_url','repository_full_name','default_branch','latest_commit_at',
@@ -223,10 +247,7 @@ def collect(conn,scan_id,allow_running=False,tick=lambda:None):
             'raw_github_response','raw_npm_response','github_status','npm_status','github_error','npm_error',
             'github_checked_at','npm_checked_at']
         for i,p in enumerate(packages,1):
-            tick()
-            key=(p['name'],p['installed_version'])
-            if key not in results: results[key]=inspect_package(client,*key)
-            info=results[key]
+            info=results[(p['name'],p['installed_version'])]
             vals=[Jsonb(info[k]) if k.startswith('raw_') else info[k] for k in columns]
             with conn.transaction():
                 # Fixed column list, no user-controlled SQL identifiers.

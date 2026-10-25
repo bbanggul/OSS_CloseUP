@@ -1,0 +1,28 @@
+# EC2 데모 배포용 추가 설정. .env 에 아래 두 줄을 넣으면 평소 `docker compose ...` 명령에 자동 포함됨
+#   COMPOSE_FILE=docker-compose.yml:docker-compose.prod.yml
+#   SITE_ADDRESS=<접속 주소>
+# 팀 계정: bash scripts/deploy-user.sh <아이디>
+
+services:
+  web:
+    build: ./frontend
+    restart: unless-stopped
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:?.env에 SITE_ADDRESS 필요}
+    ports:
+      - "80:80"     # 인증서 발급(HTTP-01)과 HTTPS 이동용
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./deploy/users.caddy:/etc/caddy/users.caddy:ro
+      - caddy-data:/data        # 발급받은 인증서 보관 (재시작해도 다시 받지 않게)
+      - caddy-config:/config
+    depends_on:
+      - backend
+
+  backend:
+    ports: !reset []            # 서버에서는 web(Caddy)만 외부에 열림
+
+volumes:
+  caddy-data:
+  caddy-config:

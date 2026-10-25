@@ -131,10 +131,10 @@ class ServiceTests(unittest.TestCase):
     def test_report_snapshot_counts_more_than_thirty(self):
         self.cur.fetchone.return_value = {'status': 'completed'}
         self.cur.fetchall.side_effect = [[], [dict(self.s['items'][0], finding_id=str(i)) for i in range(45)]]
-        with patch('app.ai_narrative.snapshot_for_report', return_value={'layout': 'narrative-v3'}) as build:
+        with patch('app.ai_narrative.snapshot_for_report', return_value={'layout': 'package-v1'}) as build:
             result = self.real_snapshot(self.conn, self.sid)
         self.assertEqual(len(build.call_args.args[4]), 45)
-        self.assertEqual(result['layout'], 'narrative-v3')
+        self.assertEqual(result['layout'], 'package-v1')
 
     def test_missing_finding_rejected_before_generation(self):
         self.cur.fetchone.return_value = {'status': 'completed'}

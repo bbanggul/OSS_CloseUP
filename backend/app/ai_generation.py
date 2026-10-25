@@ -69,7 +69,7 @@ def allowed_reasons(item):
 
 
 def model_payload(snapshot, model):
-    if snapshot.get("layout") == "narrative-v3":
+    if snapshot.get("layout") == "package-v1":
         from .ai_narrative import model_payload as narrative_payload
         return narrative_payload(snapshot, model)
     items = snapshot["items"]
@@ -136,7 +136,7 @@ def call_model(snapshot, key, model):
 
 
 def render_output(snapshot, selection):
-    if snapshot.get("layout") == "narrative-v3":
+    if snapshot.get("layout") == "package-v1":
         from .ai_narrative import render_report
         return render_report(snapshot, selection)
     if snapshot.get("layout") == "grouped-v2":
