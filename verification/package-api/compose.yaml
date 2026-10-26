@@ -1,0 +1,57 @@
+x-runtime: &runtime
+  image: oss-closeup-package-api-review:local
+  build:
+    context: ../..
+    dockerfile: verification/package-api/Dockerfile
+  working_dir: /source
+  environment: &env
+    DB_HOST: db
+    DB_USER: verification
+    DB_PASSWORD: isolated_week5_only
+    DB_NAME: verification
+    PRIORITY_TEST_DSN: postgresql://verification:isolated_week5_only@db/verification
+    PYTHONDONTWRITEBYTECODE: '1'
+    PYTHONPATH: /source:/source/worker:/source/worker/tests
+    UPLOAD_CLEANUP_INTERVAL_SECONDS: '0'
+    SCAN_STORAGE_ROOT: /tmp/verification-uploads
+    SCAN_RESULTS_ROOT: /tmp/verification-results
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: verification
+      POSTGRES_PASSWORD: isolated_week5_only
+      POSTGRES_DB: verification
+    tmpfs: [/var/lib/postgresql/data]
+    volumes:
+      - ../../db/oss_closeup_v2.sql:/docker-entrypoint-initdb.d/001.sql:ro
+      - ../../db/oss_closeup_v2_1_ai_analysis.sql:/docker-entrypoint-initdb.d/002.sql:ro
+      - ../../db/oss_closeup_v2_2_priority.sql:/docker-entrypoint-initdb.d/003.sql:ro
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U verification -d verification']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  api:
+    <<: *runtime
+    entrypoint: [python, -m, uvicorn, backend.app.main:app, --host, 0.0.0.0, --port, '8000']
+    volumes: ['../..:/source:ro']
+    depends_on:
+      db: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+  check:
+    <<: *runtime
+    entrypoint: [python, /verification/run_checks.py]
+    volumes:
+      - ../..:/source:ro
+      - .:/verification:ro
+      - ./results:/verification/results
+    depends_on:
+      api: {condition: service_healthy}
+networks:
+  default:
+    internal: true

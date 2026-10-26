@@ -48,3 +48,5 @@ app.include_router(sbom_router)
 app.include_router(ai_router)
 from .dependency_view import router as dependency_router
 app.include_router(dependency_router)
+from .package_api import router as package_router
+app.include_router(package_router)

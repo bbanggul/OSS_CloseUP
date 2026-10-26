@@ -1,0 +1,20 @@
+{
+  "cases": 29,
+  "variants": 38,
+  "service_checks": 340,
+  "service_checks_passed": 340,
+  "http_checks": 20,
+  "http_checks_passed": 20,
+  "junit_suites": [
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "367",
+      "time": "15.403",
+      "timestamp": "2026-10-26T09:11:39.186761+00:00",
+      "hostname": "91beb605e19b"
+    }
+  ]
+}
