@@ -81,9 +81,14 @@ def test_failed_publication_rolls_back_and_masks_old_grade(database,monkeypatch)
     outcome=evaluate_scan(conn,scan)
     assert outcome['status']=='failed'
     assert conn.execute('SELECT priority FROM finding_packages').fetchone()['priority']=='P0'
-    rows=conn.execute('SELECT status,result,error FROM priority_evaluations ORDER BY created_at').fetchall()
+    rows=conn.execute('SELECT status,result,error,attempted_payload FROM priority_evaluations ORDER BY created_at').fetchall()
     assert [r['status'] for r in rows]==['completed','failed']
-    assert rows[1]['result'] is None and 'message' not in rows[1]['error']
+    assert rows[1]['result'] is None
+    assert rows[1]['error']['message_policy'] == 'safe-stage-summary-v1'
+    assert 'rolled back' in rows[1]['error']['message']
+    assert 'simulated secret' not in json.dumps(rows)
+    assert rows[1]['attempted_payload'] == outcome['attempted_payload']
+    assert rows[0]['attempted_payload'] is None
     marker=conn.execute('SELECT tool_status FROM scan_runs').fetchone()['tool_status']
     state,result=load_priority(conn,scan['scan_id'],marker)
     item={'finding_id':fid,'packages':[{'package_id':pid,'priority':'P0'}]}
@@ -227,3 +232,129 @@ def test_1001_rows_real_postgres_http_pagination(database, monkeypatch):
         assert client.get(f'/scans/{sid}/{resource}?limit=501').status_code == 422
         if resource == 'findings':
             assert sorted(r['evidence']['test_record'] for r in items) == list(range(1,1002))
+
+
+def test_explicit_ghsa_deduplication_survives_storage_api_and_priority(database, monkeypatch):
+    """Multiple source IDs, one explicit GHSA; two installs, one Finding."""
+    from worker.app.normalizer import normalize_results
+    from worker.app.finding_storage import persist
+    from backend.app import uploads
+    from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+    conn = database
+    scan, _, _ = seed(conn)
+    sid = scan['scan_id']
+    conn.execute('DELETE FROM findings WHERE scan_id=%s', (sid,))
+    conn.execute('DELETE FROM packages WHERE scan_id=%s', (sid,))
+    package = {'dependencies': {'demo': '1.0.0'}}
+    lock = {'lockfileVersion': 3, 'packages': {'': {},
+        'node_modules/demo': {'version': '1.0.0'},
+        'node_modules/parent/node_modules/demo': {'version': '1.0.0'}}}
+    trivy = {'SchemaVersion': 2, 'Results': [{'Type': 'npm', 'Vulnerabilities': [
+        {'VulnerabilityID': 'CVE-example-a', 'VendorIDs': ['GHSA-example'],
+         'PkgName': 'demo', 'InstalledVersion': '1.0.0', 'Severity': 'CRITICAL', 'FixedVersion': '1.1.0'},
+        {'VulnerabilityID': 'CVE-example-b', 'VendorIDs': ['GHSA-example'],
+         'PkgName': 'demo', 'InstalledVersion': '1.0.0', 'Severity': 'HIGH', 'FixedVersion': '2.0.0'}]}]}
+    osv = {'results': [{'packages': [{'package': {'ecosystem': 'npm', 'name': 'demo', 'version': '1.0.0'},
+        'vulnerabilities': [{'id': 'GHSA-example', 'aliases': ['CVE-example-a', 'CVE-example-b'],
+                             'database_specific': {'severity': 'HIGH'}}]}]}]}
+    doc = normalize_results(package, lock, {'trivy': trivy, 'osv': osv},
+        {t: {'status': 'completed'} for t in ('trivy', 'osv')}, scan_id=str(sid))
+    assert doc['summary']['findings'] == 1
+    for p in doc['packages']:
+        conn.execute('INSERT INTO packages(scan_id,name,installed_version,lockfile_path,relationship) VALUES(%s,%s,%s,%s,%s)',
+                     (sid, p['name'], p['version'], p['lock_path'], p['dependency_type']))
+    with conn.transaction():
+        summary = persist(conn, sid, doc, {'synthetic_fixture': True})
+    assert summary['deduplication']['before_finding_count'] == 3
+    assert summary['deduplication']['after_finding_count'] == 1
+    stored = conn.execute('SELECT * FROM findings WHERE scan_id=%s', (sid,)).fetchall()
+    links = conn.execute('SELECT * FROM finding_packages WHERE scan_id=%s ORDER BY package_id', (sid,)).fetchall()
+    assert len(stored) == 1 and len(links) == 2
+    assert stored[0]['evidence']['normalized'] == doc['findings'][0]
+    with conn.transaction():
+        persist(conn, sid, doc, {'synthetic_fixture': True})
+    assert conn.execute('SELECT * FROM findings WHERE scan_id=%s', (sid,)).fetchall() == stored
+    assert conn.execute('SELECT * FROM finding_packages WHERE scan_id=%s ORDER BY package_id', (sid,)).fetchall() == links
+    before = source_snapshot(conn, sid)
+    outcome = evaluate_scan(conn, scan)
+    assert outcome['status'] == 'completed'
+    assert outcome['result']['summary']['finding_count'] == 1
+    assert outcome['result']['summary']['link_count'] == 2
+    assert all(x['priority'] == 'P0' for x in outcome['result']['package_results'])
+    assert source_snapshot(conn, sid) == before
+    @contextmanager
+    def connect():
+        yield conn
+    monkeypatch.setattr(uploads, 'connect', connect)
+    app = FastAPI(); app.include_router(uploads.router)
+    client = TestClient(app)
+    response = client.get(f'/scans/{sid}/findings')
+    assert response.status_code == 200
+    body = response.json()
+    assert body['total'] == 1
+    assert body['normalization']['deduplication'] == doc['deduplication']
+    assert body['items'][0]['evidence']['normalized'] == doc['findings'][0]
+    assert len(body['items'][0]['packages']) == 2
+    assert all(p['priority'] == 'P0' for p in body['items'][0]['packages'])
+    assert all([c['value'] for c in p['fixed_version_candidates']] == ['1.1.0', '2.0.0']
+               for p in body['items'][0]['packages'])
+    assert body['priority_evaluation']['summary']['finding_count'] == 1
+    assert client.get(f'/scans/{sid}/findings?limit=1&offset=1').json()['items'] == []
+    # Changed normalization must never silently rewrite an existing scan.
+    changed = json.loads(json.dumps(doc))
+    changed['deduplication']['rule_version'] = 'different-policy'
+    with pytest.raises(ValueError, match='normalized_source_changed_upload_as_new_scan'):
+        with conn.transaction():
+            persist(conn, sid, changed, {})
+
+
+@pytest.mark.parametrize('mode', ['invalid_input', 'build_failure'])
+def test_d07_error_preserves_input_and_safe_message(database, monkeypatch, mode):
+    from worker.app import priority_storage as storage
+    conn = database
+    scan, _, _ = seed(conn)
+    before = source_snapshot(conn, scan['scan_id'])
+    original = storage.build_payload
+    def broken(snapshot):
+        if mode == 'build_failure':
+            raise ValueError('postgresql://user:synthetic-password@db/private')
+        payload = original(snapshot)
+        payload['test_only'] = True
+        return payload
+    monkeypatch.setattr(storage, 'build_payload', broken)
+    outcome = evaluate_scan(conn, scan)
+    row = conn.execute('SELECT * FROM priority_evaluations').fetchone()
+    assert row['status'] == ('invalid_input' if mode == 'invalid_input' else 'failed')
+    assert row['result'] is None
+    assert row['attempted_payload'] == outcome['attempted_payload']
+    if mode == 'invalid_input':
+        assert row['attempted_payload']['test_only'] is True
+        assert row['error']['code'] == 'TEST_DATA_NOT_ALLOWED'
+        assert row['error']['field_path'] == 'test_only'
+    else:
+        assert row['attempted_payload'] is None
+        assert row['error']['code'] == 'PRIORITY_INPUT_BUILD_FAILED'
+    assert row['error']['message']
+    assert row['error']['message_policy'] == 'safe-stage-summary-v1'
+    assert 'synthetic-password' not in json.dumps(row, default=str)
+    assert source_snapshot(conn, scan['scan_id']) == before
+    marker = conn.execute('SELECT tool_status FROM scan_runs').fetchone()['tool_status']
+    state, result = load_priority(conn, scan['scan_id'], marker)
+    assert state['current_result_available'] is False
+    assert result is None
+
+
+def test_d07_additive_migration_preserves_existing_evaluation(database):
+    conn = database
+    scan, _, _ = seed(conn)
+    evaluate_scan(conn, scan)
+    before = conn.execute('SELECT * FROM priority_evaluations').fetchone()
+    # Simulate the previous deployed table, then apply the real migration twice.
+    conn.execute('ALTER TABLE priority_evaluations DROP COLUMN attempted_payload')
+    root = Path(__file__).resolve().parents[2]
+    body = (root / 'db/oss_closeup_v2_2_priority.sql').read_text()
+    sql_body = '\n'.join(line for line in body.splitlines() if not line.startswith('\\'))
+    conn.execute(sql_body)
+    conn.execute(sql_body)
+    assert conn.execute('SELECT * FROM priority_evaluations').fetchone() == before

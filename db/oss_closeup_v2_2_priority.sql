@@ -15,5 +15,7 @@ CREATE TABLE IF NOT EXISTS priority_evaluations (
     finished_at TIMESTAMPTZ,
     CHECK ((status='completed') = (result IS NOT NULL))
 );
+-- Additive migration for existing installations; re-running is safe.
+ALTER TABLE priority_evaluations ADD COLUMN IF NOT EXISTS attempted_payload JSONB;
 CREATE INDEX IF NOT EXISTS priority_evaluations_scan ON priority_evaluations(scan_id,created_at DESC);
 COMMIT;

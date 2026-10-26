@@ -123,3 +123,23 @@ result.security_status=failed, 패키지 상태는 unavailable이다. 탐지 0�
 중간 우선순위 쓰기 실패, 입력 오류, 입력 구성 실패, 시험 입력, 다른 검사 ID,
 과거 정상 결과 이력, 정상 재시도, 근거·오류 저장소 장애를 검증한다.
 이는 저장 경계 프로토콜의 실행 검증이며 팀 PostgreSQL 저장기·운영 worker·API/UI 통합 통과를 뜻하지 않는다.
+
+
+## PostgreSQL 구현 보완 — 2026-10-26
+
+`PostgresPriorityStore.save_priority_error`는 오류 상태·구조화된 오류 정보와
+`attempted_payload`를 같은 오류 기록 트랜잭션에 저장한다. 입력 구성 전에 실패하면
+`attempted_payload`는 SQL NULL이고, 구성 후 검증·게시 실패 시에는 계산 전에 복사한
+입력을 JSONB로 보존한다. 이 필드는 오류 진단 자료이며 검증된 계산 결과가 아니다.
+기존 `evidence_snapshot`과 검사 원문은 별도로 유지한다.
+
+DB의 `error.message`에는 예외 원문 대신 단계별 고정 설명을 저장하고,
+`error.message_policy=safe-stage-summary-v1`로 표시한다. DB 접속정보 등이 포함될 수 있는
+임의 예외 문자열을 저장하지 않는다. 구체적인 오류 구분은 기존 code·field_path·exception_type을
+함께 확인한다. 조정 함수가 반환하는 메모리상의 record와 DB의 정제된 메시지는 다를 수 있다.
+입력 전체는 내부 진단 테이블에 저장하며 공개 API 응답에 추가하지 않는다.
+
+적용 전에 `db/oss_closeup_v2_2_priority.sql`을 실행하여 `attempted_payload JSONB` 열을
+추가해야 한다. 기존 테이블·평가 이력은 유지되며 반복 실행할 수 있다.
+기존 이력에 당시 입력을 소급 생성하지 않는다. 스키마 반영 후 수정된 worker를 배포한다.
+이는 로컬 구현 보완이며 원격 저장소·운영 DB 반영 또는 팀의 별도 승인 완료를 뜻하지 않는다.

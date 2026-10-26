@@ -1,0 +1,145 @@
+[
+  {
+    "sample": "poc77",
+    "before": {
+      "packages": 76,
+      "direct_packages": 10,
+      "indirect_packages": 66,
+      "raw_records": 105,
+      "findings": 53,
+      "merged_pairs": 52,
+      "manual_review": 1,
+      "alias_groups": 49
+    },
+    "after": {
+      "packages": 76,
+      "direct_packages": 10,
+      "indirect_packages": 66,
+      "raw_records": 105,
+      "findings": 53,
+      "merged_pairs": 52,
+      "manual_review": 1,
+      "alias_groups": 49
+    },
+    "exact_document_equal": true,
+    "remaining_multi_finding_alias_groups": [
+      {
+        "alias_group_id": "alias_7e6c7d5b1708e274c3b32304",
+        "scan_id": "9822e329df5d4931b4d330b248c543b1",
+        "finding_ids": [
+          "finding_471c5bfbfb85346d554ed6b7",
+          "finding_471a73196804875eb1faaf57"
+        ],
+        "identifiers": [
+          "CVE-2021-23337",
+          "CVE-2026-4800",
+          "GHSA-35jh-r3h4-6jhm",
+          "GHSA-r5fr-rjxr-66jc"
+        ]
+      },
+      {
+        "alias_group_id": "alias_030d8ff6ebb32fce0f063909",
+        "scan_id": "9822e329df5d4931b4d330b248c543b1",
+        "finding_ids": [
+          "finding_ed5bc8ba5376e0f6a1d5c272",
+          "finding_89e6abf309e8c5437d725ad8"
+        ],
+        "identifiers": [
+          "CVE-2025-13465",
+          "CVE-2026-2950",
+          "GHSA-f23m-r3pf-42rh",
+          "GHSA-xxjr-mmjv-4gpg"
+        ]
+      },
+      {
+        "alias_group_id": "alias_641b556218df48549f6255bf",
+        "scan_id": "9822e329df5d4931b4d330b248c543b1",
+        "finding_ids": [
+          "finding_3349c6cf10f9146c13cd8679",
+          "finding_27c89c9912c0c7e5b3c274b3"
+        ],
+        "identifiers": [
+          "CVE-2024-45296",
+          "CVE-2026-4867",
+          "GHSA-37ch-88jc-xwx2",
+          "GHSA-9wv6-86v2-598j"
+        ]
+      }
+    ]
+  },
+  {
+    "sample": "indirect-critical",
+    "before": {
+      "packages": 9,
+      "direct_packages": 1,
+      "indirect_packages": 8,
+      "raw_records": 68,
+      "findings": 34,
+      "merged_pairs": 34,
+      "manual_review": 0,
+      "alias_groups": 34
+    },
+    "after": {
+      "packages": 9,
+      "direct_packages": 1,
+      "indirect_packages": 8,
+      "raw_records": 68,
+      "findings": 34,
+      "merged_pairs": 34,
+      "manual_review": 0,
+      "alias_groups": 34
+    },
+    "exact_document_equal": true,
+    "remaining_multi_finding_alias_groups": []
+  },
+  {
+    "sample": "no-fix",
+    "before": {
+      "packages": 47,
+      "direct_packages": 1,
+      "indirect_packages": 46,
+      "raw_records": 14,
+      "findings": 7,
+      "merged_pairs": 7,
+      "manual_review": 0,
+      "alias_groups": 7
+    },
+    "after": {
+      "packages": 47,
+      "direct_packages": 1,
+      "indirect_packages": 46,
+      "raw_records": 14,
+      "findings": 7,
+      "merged_pairs": 7,
+      "manual_review": 0,
+      "alias_groups": 7
+    },
+    "exact_document_equal": true,
+    "remaining_multi_finding_alias_groups": []
+  },
+  {
+    "sample": "gpl-license",
+    "before": {
+      "packages": 20,
+      "direct_packages": 1,
+      "indirect_packages": 19,
+      "raw_records": 0,
+      "findings": 0,
+      "merged_pairs": 0,
+      "manual_review": 0,
+      "alias_groups": 0
+    },
+    "after": {
+      "packages": 20,
+      "direct_packages": 1,
+      "indirect_packages": 19,
+      "raw_records": 0,
+      "findings": 0,
+      "merged_pairs": 0,
+      "manual_review": 0,
+      "alias_groups": 0
+    },
+    "exact_document_equal": true,
+    "remaining_multi_finding_alias_groups": []
+  }
+]

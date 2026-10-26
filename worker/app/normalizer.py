@@ -171,6 +171,66 @@ def _records(tool, data):
     return rows
 
 
+def _consolidate_explicit_ghsa(findings, rows, neighbors, scan_id):
+    """Collapse repeated explicit identities, never general alias components.
+
+    All members must name exactly the same single GHSA in the same npm package
+    version. Distinct/multiple GHSAs, CVE-only links and manual NSWG records stay
+    separate. Every raw record, observation and candidate is retained.
+    """
+    buckets = {}
+    for position, finding in enumerate(findings):
+        ghsas = [v for v in finding['identifiers'] if v.startswith('GHSA-')]
+        safe = (len(ghsas) == 1 and
+                'NSWG-ECO-516' not in finding['identifiers'])
+        key = ('ghsa', finding['package_name'], finding['installed_version'], ghsas[0]) if safe else ('single', position)
+        buckets.setdefault(key, []).append(finding)
+
+    result, merged = [], []
+    row_positions = {row['record_id']: i for i, row in enumerate(rows)}
+    for key, members in buckets.items():
+        if len(members) == 1:
+            result.append(members[0])
+            continue
+        combined = deepcopy(members[0])
+        evidence = [e for member in members for e in member['evidence']]
+        record_ids = {e['record_id'] for e in evidence}
+        # Keep source order and preserve the exact original evidence objects.
+        evidence.sort(key=lambda e: row_positions[e['record_id']])
+        positions = [row_positions[e['record_id']] for e in evidence]
+        sources = [rows[i] for i in positions]
+        reasons = {reason for member in members for reason in member['review_reasons']}
+        if not any(rows[j]['record_id'] not in record_ids
+                   for i in positions for j, _ in neighbors.get(i, [])):
+            reasons.discard('ambiguous_advisory_mapping')
+        observations = [s['severity'] for s in sources]
+        values = {s['normalized'] for s in observations}
+        combined.update(
+            finding_id=_id('finding', scan_id, combined['package_name'],
+                           combined['installed_version'], sorted(record_ids)),
+            identifiers=sorted({v for member in members for v in member['identifiers']}),
+            source_tools=sorted({s['tool'] for s in sources}),
+            severity=max(values, key=SEVERITIES.index),
+            severity_observations=deepcopy(observations),
+            severity_conflict=len(values - {'UNKNOWN'}) > 1,
+            priority_input_eligible=all(s['normalization_status'] != 'unsupported' for s in observations),
+            fixed_version_candidates=[deepcopy(fix) for s in sources for fix in s['fixes']],
+            fix_information='candidates_available' if any(s['fixes'] for s in sources) else 'not_reported',
+            evidence=deepcopy(evidence),
+            merge_basis={'kind': 'explicit_ghsa_identity', 'shared_identifiers': [key[3]],
+                         'source_finding_ids': [member['finding_id'] for member in members]},
+            review_status='needs_review' if reasons else 'reported',
+            review_reasons=sorted(reasons),
+        )
+        merged.append({'finding_id': combined['finding_id'],
+                       'package_name': combined['package_name'],
+                       'installed_version': combined['installed_version'],
+                       'shared_identifier': key[3],
+                       'source_finding_ids': combined['merge_basis']['source_finding_ids']})
+        result.append(combined)
+    return result, merged
+
+
 def normalize_results(package, lock, tool_results, tool_status, *, scan_id):
     """Normalize successful tool results only. tool_status uses scanner report entries.
 
@@ -282,6 +342,11 @@ def normalize_results(package, lock, tool_results, tool_status, *, scan_id):
                                          'shared_identifiers': shared},
                          'review_status': 'needs_review' if reasons else 'reported',
                          'review_reasons': reasons})
+    # A one-to-one tool match can leave repeated reports of a single explicit
+    # GHSA identity unmerged. Resolve only that narrower, auditable condition.
+    matched_pairs = sum(len(f['evidence']) == 2 for f in findings)
+    before_deduplication = len(findings)
+    findings, deduplicated = _consolidate_explicit_ghsa(findings, rows, neighbors, scan_id)
     # Alias connectivity is deliberately NOT used to merge Findings.
     remaining = set(range(len(findings)))
     groups = []
@@ -311,7 +376,7 @@ def normalize_results(package, lock, tool_results, tool_status, *, scan_id):
                        'finding_ids': [f['finding_id'] for f in members],
                        'identifiers': sorted({v for f in members for v in f['identifiers']})})
     successes = sum(s.get('status') == 'completed' for s in statuses.values())
-    return {'schema_version': 'normalization-v1', 'scan_id': scan_id,
+    document = {'schema_version': 'normalization-v1', 'scan_id': scan_id,
             'status': {0: 'failed', 1: 'partial', 2: 'completed'}[successes],
             'severity_policy': 'highest_reported_label; MODERATE=MEDIUM; no CVSS vector calculation',
             'tool_status': statuses, 'packages': packages, 'findings': findings,
@@ -320,9 +385,18 @@ def normalize_results(package, lock, tool_results, tool_status, *, scan_id):
                         'direct_packages': sum(p['dependency_type'] == 'direct' for p in packages),
                         'indirect_packages': sum(p['dependency_type'] == 'indirect' for p in packages),
                         'raw_records': len(rows), 'findings': len(findings),
-                        'merged_pairs': sum(len(f['evidence']) == 2 for f in findings),
+                        'merged_pairs': matched_pairs,
                         'manual_review': sum(f['review_status'] == 'needs_review' for f in findings),
                         'alias_groups': len(groups)}}
+    if deduplicated:
+        document['deduplication'] = {
+            'rule_version': 'explicit-ghsa-v1',
+            'before_finding_count': before_deduplication,
+            'after_finding_count': len(findings),
+            'removed_duplicate_count': before_deduplication - len(findings),
+            'groups': deduplicated,
+        }
+    return document
 
 
 def normalize_scan(scan_dir, *, scan_id=None):

@@ -1,0 +1,9 @@
+invalid_candidate True
+wrong_scan True
+test_input True
+input_build_error True
+write_rollback True
+error_storage_failure True
+evidence_storage_failure True
+stale_worker True
+cross-case ordering True ['B01', 'S02', 'B02', 'S01', 'S09', 'S10', 'S03', 'S05', 'S07', 'S04', 'S06', 'S08']

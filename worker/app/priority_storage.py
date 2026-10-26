@@ -126,13 +126,24 @@ class PostgresPriorityStore:
             self.publish_state(record)
 
     def save_priority_error(self, record):
-        # Do not store arbitrary exception strings (e.g. DB errors containing credentials).
+        # Persist the pre-calculation input separately from trusted source evidence.
+        # Exception text may contain database credentials; use a stable stage
+        # description and preserve structured code/path/type for diagnosis.
         error = {k: record['error'].get(k) for k in ('stage','code','field_path','exception_type')}
+        error['message'] = {
+            'input_build': 'Priority input could not be constructed; inspect the error code and source evidence.',
+            'calculation': ('Priority input validation failed; inspect the error code and field path.'
+                            if record['status'] == 'invalid_input' else 'Priority calculation failed.'),
+            'priority_storage': 'Priority result could not be saved; priority changes were rolled back.',
+        }.get(error['stage'], 'Priority evaluation failed; inspect the structured error fields.')
+        error['message_policy'] = 'safe-stage-summary-v1'
         with self.conn.transaction():
             row = self.fence()
-            updated = self.conn.execute('''UPDATE priority_evaluations SET status=%s,error=%s,finished_at=clock_timestamp()
+            updated = self.conn.execute('''UPDATE priority_evaluations SET status=%s,error=%s,attempted_payload=%s,finished_at=clock_timestamp()
                 WHERE evaluation_id=%s AND status='running' ''',
-                (record['status'],Jsonb(error),record['evaluation_id']))
+                (record['status'],Jsonb(error),
+                 Jsonb(record['attempted_payload']) if record.get('attempted_payload') is not None else None,
+                 record['evaluation_id']))
             if updated.rowcount != 1:
                 raise ValueError('priority_evaluation_not_running')
             if row['tool_status'].get('priority', {}).get('evaluation_id') == record['evaluation_id']:

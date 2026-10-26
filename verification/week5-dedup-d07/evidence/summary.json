@@ -1,0 +1,83 @@
+{
+  "original_cases": 29,
+  "variants": 38,
+  "variants_passed": 38,
+  "d07_scenarios": 8,
+  "d07_scenarios_passed": 8,
+  "service_checks": 340,
+  "service_checks_passed": 340,
+  "d07_checks": 72,
+  "d07_checks_passed": 72,
+  "ordering_checks": 19,
+  "ordering_checks_passed": 19,
+  "junit_suites": [
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "363",
+      "time": "12.186",
+      "timestamp": "2026-10-26T08:48:18.731838+00:00",
+      "hostname": "5d86ce5e395f"
+    }
+  ],
+  "d07_diagnostics": [
+    {
+      "scenario": "invalid_candidate",
+      "contract_diagnostics": {
+        "attempted_payload_persisted": true,
+        "error_message_persisted": true
+      }
+    },
+    {
+      "scenario": "wrong_scan",
+      "contract_diagnostics": {
+        "attempted_payload_persisted": true,
+        "error_message_persisted": true
+      }
+    },
+    {
+      "scenario": "test_input",
+      "contract_diagnostics": {
+        "attempted_payload_persisted": true,
+        "error_message_persisted": true
+      }
+    },
+    {
+      "scenario": "input_build_error",
+      "contract_diagnostics": {
+        "attempted_payload_persisted": true,
+        "error_message_persisted": true
+      }
+    },
+    {
+      "scenario": "write_rollback",
+      "contract_diagnostics": {
+        "attempted_payload_persisted": true,
+        "error_message_persisted": true
+      }
+    },
+    {
+      "scenario": "error_storage_failure",
+      "contract_diagnostics": {
+        "attempted_payload_persisted": false,
+        "error_message_persisted": false
+      }
+    },
+    {
+      "scenario": "evidence_storage_failure",
+      "contract_diagnostics": {
+        "attempted_payload_persisted": false,
+        "error_message_persisted": false
+      }
+    },
+    {
+      "scenario": "stale_worker",
+      "contract_diagnostics": {
+        "attempted_payload_persisted": false,
+        "error_message_persisted": false
+      }
+    }
+  ]
+}

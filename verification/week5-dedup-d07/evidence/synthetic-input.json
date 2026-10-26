@@ -1,0 +1,89 @@
+{
+  "package": {
+    "dependencies": {
+      "demo": "1.0.0"
+    }
+  },
+  "lock": {
+    "lockfileVersion": 3,
+    "packages": {
+      "": {},
+      "node_modules/demo": {
+        "version": "1.0.0"
+      }
+    }
+  },
+  "tool_results": {
+    "trivy": {
+      "SchemaVersion": 2,
+      "Results": [
+        {
+          "Type": "npm",
+          "Target": "package-lock.json",
+          "Vulnerabilities": [
+            {
+              "VulnerabilityID": "CVE-a",
+              "VendorIDs": [
+                "GHSA-same"
+              ],
+              "PkgName": "demo",
+              "InstalledVersion": "1.0.0",
+              "Severity": "HIGH",
+              "FixedVersion": "1.1.0"
+            },
+            {
+              "VulnerabilityID": "CVE-b",
+              "VendorIDs": [
+                "GHSA-same"
+              ],
+              "PkgName": "demo",
+              "InstalledVersion": "1.0.0",
+              "Severity": "CRITICAL",
+              "FixedVersion": "2.0.0"
+            }
+          ]
+        }
+      ]
+    },
+    "osv": {
+      "results": [
+        {
+          "source": {
+            "path": "package-lock.json"
+          },
+          "packages": [
+            {
+              "package": {
+                "ecosystem": "npm",
+                "name": "demo",
+                "version": "1.0.0"
+              },
+              "vulnerabilities": [
+                {
+                  "id": "GHSA-same",
+                  "aliases": [
+                    "CVE-a",
+                    "CVE-b"
+                  ],
+                  "database_specific": {
+                    "severity": "MODERATE"
+                  },
+                  "affected": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "tool_status": {
+    "trivy": {
+      "status": "completed"
+    },
+    "osv": {
+      "status": "completed"
+    }
+  },
+  "scan_id": "synthetic-dedup-reproduction"
+}

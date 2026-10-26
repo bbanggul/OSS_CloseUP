@@ -125,6 +125,9 @@ def persist(conn, scan_id, doc, provenance):
     summary = {**doc['summary'], 'status':doc['status'], 'roundtrip_verified':True,
         'finding_package_links':len(links), 'fingerprint':fingerprint,
         'source_artifacts':provenance, 'tool_status':doc['tool_status']}
+    if 'deduplication' in doc:
+        # Returned by the findings API through its existing normalization field.
+        summary['deduplication'] = doc['deduplication']
     conn.execute('UPDATE scan_runs SET tool_status=tool_status || %s WHERE scan_id=%s',
         (Jsonb({'normalization':summary}),scan_id))
     return summary
