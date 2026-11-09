@@ -1,0 +1,205 @@
+{
+  "schema_version": "scan-compare-v1",
+  "policy_version": "compare-policy-v1",
+  "comparison_id": "compare_ed68162f069a392e1fc940db22f315f0a0c4d29d4ef9c6ad359f1e8c6efd6212",
+  "project": {
+    "project_id": "94974492-7a7d-5fcd-a5c6-a3b603a76ef1",
+    "name": "compare-contract-demo"
+  },
+  "base": {
+    "scan_id": "9eb23bd9-8827-5210-8a60-3ceb3f8e2fe3",
+    "project_id": "94974492-7a7d-5fcd-a5c6-a3b603a76ef1",
+    "status": "completed",
+    "result_state": "ready",
+    "created_at": "2026-10-30T03:00:00Z",
+    "finished_at": "2026-10-30T03:00:10Z",
+    "input_package_lock_sha256": "fe3a0ee50ad3e914c154075c73d7f6770eb52326a66d23cc5fa8bae54a558290",
+    "normalization_fingerprint": "e02fd6bf9585a81aa3260ee5a222d62f5fa3b2c717698621495bd770b6a7c108",
+    "inventory_complete": true,
+    "findings_usable": true,
+    "security_complete": true,
+    "absence_eligible": true,
+    "absence_blockers": [],
+    "provenance_status": "verified",
+    "sources": {
+      "trivy": {
+        "status": "completed",
+        "tool_run_id": "8eaa9b0d-330d-5f23-a884-0ded1d9870cf",
+        "tool_version": "synthetic-tool-v1",
+        "database_version": "synthetic-db-1",
+        "queried_at": null
+      },
+      "osv": {
+        "status": "completed",
+        "tool_run_id": "90409b99-56fb-57a9-98ad-264a0376edbc",
+        "tool_version": "synthetic-tool-v1",
+        "database_version": null,
+        "queried_at": "2026-10-30T03:00:08Z"
+      }
+    },
+    "snapshot_id": "compare_input_3420bd5c74ce9a2d4d91eb18385e75ac404bcd61d5747f862b687ac929ab0ac5"
+  },
+  "target": {
+    "scan_id": "8cdb9df0-52ca-502e-895f-d09fea81018a",
+    "project_id": "94974492-7a7d-5fcd-a5c6-a3b603a76ef1",
+    "status": "completed",
+    "result_state": "ready",
+    "created_at": "2026-10-31T03:00:00Z",
+    "finished_at": "2026-10-31T03:00:10Z",
+    "input_package_lock_sha256": "baf736a8fac1747a111ae4d7154e15cff22bc0aab6f0f2c4435faddea3e36592",
+    "normalization_fingerprint": "fa8db30e128022b5af5983e3a145c599d8cee19e354a6bf0af147054457fdfc8",
+    "inventory_complete": true,
+    "findings_usable": true,
+    "security_complete": true,
+    "absence_eligible": true,
+    "absence_blockers": [],
+    "provenance_status": "verified",
+    "sources": {
+      "trivy": {
+        "status": "completed",
+        "tool_run_id": "a39ff289-b8f9-5db8-8c19-558ccd557603",
+        "tool_version": "synthetic-tool-v1",
+        "database_version": "synthetic-db-1",
+        "queried_at": null
+      },
+      "osv": {
+        "status": "completed",
+        "tool_run_id": "7d457965-6b12-5979-95f8-efd44119d793",
+        "tool_version": "synthetic-tool-v1",
+        "database_version": null,
+        "queried_at": "2026-10-31T03:00:08Z"
+      }
+    },
+    "snapshot_id": "compare_input_0bd2dcb7fef73e3aa3056b5beea6e150804ee7c97a8b66b9a2765444bf21db17"
+  },
+  "count_basis": "installation_comparison_item",
+  "summary": {
+    "new": 0,
+    "not_detected": 1,
+    "persisting": 0,
+    "not_comparable": 0,
+    "not_comparable_units": {
+      "installation_finding": 0,
+      "identifier_conflict": 0
+    }
+  },
+  "finding_counts": {
+    "count_basis": "stored_finding",
+    "base": {
+      "stored": 1,
+      "linked": 1,
+      "unlinked": 0
+    },
+    "target": {
+      "stored": 0,
+      "linked": 0,
+      "unlinked": 0
+    }
+  },
+  "installations": [
+    {
+      "installation_id": "installation_17ed024ba4575e69eb07266b582df06d7b3e0f1f3484e32c72d3c86a1d777f0a",
+      "ecosystem": "npm",
+      "name": "demo-lib",
+      "base": {
+        "package_id": "72f1d58e-8f0f-5f1a-9337-97bff6c93ced",
+        "lockfile_path": "node_modules/demo-lib",
+        "installed_version": "1.0.0",
+        "relationship": "indirect"
+      },
+      "target": {
+        "package_id": "51b76fb5-df8e-523c-87a9-7b4f19ae9cd3",
+        "lockfile_path": "node_modules/demo-lib",
+        "installed_version": "1.1.0",
+        "relationship": "indirect"
+      },
+      "state": "matched",
+      "location_match": "exact",
+      "location_evidence": null,
+      "version_change": {
+        "kind": "changed",
+        "direction": "increased"
+      },
+      "flags": []
+    }
+  ],
+  "items": [
+    {
+      "item_id": "item_53f41d1af1c906a1b30fad413da3fcac1c0c1f6726d559363e6a693f26385177",
+      "installation_id": "installation_17ed024ba4575e69eb07266b582df06d7b3e0f1f3484e32c72d3c86a1d777f0a",
+      "unit": "installation_finding",
+      "status": "not_detected",
+      "reason": "version_changed",
+      "base_finding_ids": [
+        "814277f1-5bc1-51ae-979e-76e3f4deff0a"
+      ],
+      "target_finding_ids": [],
+      "match": {
+        "kind": "none",
+        "identifiers": [],
+        "candidate_edges": []
+      },
+      "flags": []
+    }
+  ],
+  "finding_catalog": {
+    "base": {
+      "814277f1-5bc1-51ae-979e-76e3f4deff0a": {
+        "finding_id": "814277f1-5bc1-51ae-979e-76e3f4deff0a",
+        "identifiers": [
+          "CVE-2099-10001",
+          "GHSA-2222-3333-4444"
+        ],
+        "primary_ids": [
+          "GHSA-2222-3333-4444"
+        ],
+        "severity": "HIGH",
+        "source_tools": [
+          "osv",
+          "trivy"
+        ],
+        "manual_review_required": false,
+        "review_reasons": [],
+        "merge_identifiers": [],
+        "reference_urls": []
+      }
+    },
+    "target": {}
+  },
+  "unlinked_findings": {
+    "base": [],
+    "target": []
+  },
+  "context_changes": [
+    {
+      "tool": "trivy",
+      "field": "tool_version",
+      "base": "synthetic-tool-v1",
+      "target": "synthetic-tool-v1",
+      "state": "same"
+    },
+    {
+      "tool": "trivy",
+      "field": "database_version",
+      "base": "synthetic-db-1",
+      "target": "synthetic-db-1",
+      "state": "same"
+    },
+    {
+      "tool": "osv",
+      "field": "tool_version",
+      "base": "synthetic-tool-v1",
+      "target": "synthetic-tool-v1",
+      "state": "same"
+    },
+    {
+      "tool": "osv",
+      "field": "database_version",
+      "base": null,
+      "target": null,
+      "state": "unknown"
+    }
+  ],
+  "comparison_complete": true,
+  "warnings": []
+}

@@ -1,0 +1,240 @@
+{
+  "schema_version": "scan-compare-v1",
+  "policy_version": "compare-policy-v1",
+  "project": {
+    "project_id": "94974492-7a7d-5fcd-a5c6-a3b603a76ef1",
+    "name": "compare-contract-demo"
+  },
+  "count_basis": "installation_comparison_item",
+  "installations": [
+    {
+      "installation_id": "installation_027c40316cda9a4aa9a95b16778831723cd7c6f53f8e966abb3f74eabbe5b094",
+      "ecosystem": "npm",
+      "name": "demo-lib",
+      "state": "matched",
+      "location_match": "exact",
+      "location_evidence": null,
+      "version_change": {
+        "kind": "same",
+        "direction": "none"
+      },
+      "flags": [],
+      "base": {
+        "package_id": "3dbf57cf-0c75-5d0c-8845-2c86dfaca3c8",
+        "lockfile_path": "node_modules/demo-lib",
+        "installed_version": "1.0.0",
+        "relationship": "indirect"
+      },
+      "target": {
+        "package_id": "dddd30f8-1e8f-5fb9-a10b-569a5b1012a8",
+        "lockfile_path": "node_modules/demo-lib",
+        "installed_version": "1.0.0",
+        "relationship": "indirect"
+      }
+    }
+  ],
+  "items": [
+    {
+      "item_id": "item_845ae66d53e3fb5b7d479d2bfb545ef2e6391f1201483c2a0eab960882326429",
+      "installation_id": "installation_027c40316cda9a4aa9a95b16778831723cd7c6f53f8e966abb3f74eabbe5b094",
+      "unit": "installation_finding",
+      "status": "persisting",
+      "reason": "matched_identity",
+      "base_finding_ids": [
+        "51b22c1e-8391-53bd-8ffb-ff960d43ff7d"
+      ],
+      "target_finding_ids": [
+        "c7fb3745-145b-5f94-b6d6-ffa5887fd214"
+      ],
+      "match": {
+        "kind": "exact_ghsa",
+        "identifiers": [
+          "GHSA-2222-3333-4444"
+        ],
+        "candidate_edges": [
+          {
+            "base_finding_id": "51b22c1e-8391-53bd-8ffb-ff960d43ff7d",
+            "target_finding_id": "c7fb3745-145b-5f94-b6d6-ffa5887fd214",
+            "basis": "exact_ghsa",
+            "identifiers": [
+              "GHSA-2222-3333-4444"
+            ]
+          }
+        ]
+      },
+      "flags": [
+        "severity_changed"
+      ]
+    }
+  ],
+  "finding_catalog": {
+    "base": {
+      "51b22c1e-8391-53bd-8ffb-ff960d43ff7d": {
+        "finding_id": "51b22c1e-8391-53bd-8ffb-ff960d43ff7d",
+        "identifiers": [
+          "GHSA-2222-3333-4444",
+          "CVE-2099-10001"
+        ],
+        "primary_ids": [
+          "GHSA-2222-3333-4444"
+        ],
+        "severity": "HIGH",
+        "source_tools": [
+          "osv",
+          "trivy"
+        ],
+        "manual_review_required": false,
+        "review_reasons": [],
+        "merge_identifiers": [],
+        "reference_urls": []
+      }
+    },
+    "target": {
+      "c7fb3745-145b-5f94-b6d6-ffa5887fd214": {
+        "finding_id": "c7fb3745-145b-5f94-b6d6-ffa5887fd214",
+        "identifiers": [
+          "GHSA-2222-3333-4444",
+          "CVE-2099-10001"
+        ],
+        "primary_ids": [
+          "GHSA-2222-3333-4444"
+        ],
+        "severity": "MEDIUM",
+        "source_tools": [
+          "osv",
+          "trivy"
+        ],
+        "manual_review_required": false,
+        "review_reasons": [],
+        "merge_identifiers": [],
+        "reference_urls": []
+      }
+    }
+  },
+  "unlinked_findings": {
+    "base": [],
+    "target": []
+  },
+  "warnings": [],
+  "base": {
+    "scan_id": "490dcb92-e4c5-577d-8785-d99cb62af0da",
+    "project_id": "94974492-7a7d-5fcd-a5c6-a3b603a76ef1",
+    "status": "completed",
+    "result_state": "ready",
+    "created_at": "2026-10-30T03:00:00Z",
+    "finished_at": "2026-10-30T03:00:10Z",
+    "input_package_lock_sha256": "46cdf3c4b23d9346adc9a1594e290432b424f8afd703baba5a89412725db2943",
+    "normalization_fingerprint": "c400c1529a55a1a94e1c9db5aa173f4c696971d7de030d4d1db85534de1f4de9",
+    "inventory_complete": true,
+    "findings_usable": true,
+    "security_complete": true,
+    "absence_eligible": true,
+    "absence_blockers": [],
+    "provenance_status": "verified",
+    "sources": {
+      "trivy": {
+        "status": "completed",
+        "tool_run_id": "952b4558-ee35-5973-b5f2-18577e58f18d",
+        "tool_version": "synthetic-tool-v1",
+        "database_version": "synthetic-db-1",
+        "queried_at": null
+      },
+      "osv": {
+        "status": "completed",
+        "tool_run_id": "30a552d2-b338-5765-81d8-0fa419893e05",
+        "tool_version": "synthetic-tool-v1",
+        "database_version": null,
+        "queried_at": "2026-10-30T03:00:08Z"
+      }
+    },
+    "snapshot_id": "compare_input_917c67401da5585e2e3ee18c571121978f1d8888e957ef8beafc6580d9321f5e"
+  },
+  "target": {
+    "scan_id": "ac35c882-9c52-5bce-8f15-c3e1442559fa",
+    "project_id": "94974492-7a7d-5fcd-a5c6-a3b603a76ef1",
+    "status": "completed",
+    "result_state": "ready",
+    "created_at": "2026-10-31T03:00:00Z",
+    "finished_at": "2026-10-31T03:00:10Z",
+    "input_package_lock_sha256": "11528ea3ee2bc9bacc6f76df4e44ef2e0f958beb8f84cac4ff5f45ff3a4ac924",
+    "normalization_fingerprint": "e276853b780f24dca1f718ae5d4ae65c9e9cb8e47d406c839ebe88a3fdbe8cd3",
+    "inventory_complete": true,
+    "findings_usable": true,
+    "security_complete": true,
+    "absence_eligible": true,
+    "absence_blockers": [],
+    "provenance_status": "verified",
+    "sources": {
+      "trivy": {
+        "status": "completed",
+        "tool_run_id": "e2f17c28-a898-5000-9fb2-282b7839f8ed",
+        "tool_version": "synthetic-tool-v1",
+        "database_version": "synthetic-db-1",
+        "queried_at": null
+      },
+      "osv": {
+        "status": "completed",
+        "tool_run_id": "6ffeb7e9-b762-5e87-bfbc-8fb57ffd8224",
+        "tool_version": "synthetic-tool-v1",
+        "database_version": null,
+        "queried_at": "2026-10-31T03:00:08Z"
+      }
+    },
+    "snapshot_id": "compare_input_bffb11b38fc9c7b142fbdb869bf3a2d96aa946a57fdb9a49a3000eeb8d5e1590"
+  },
+  "comparison_id": "compare_37510d8216659f4d6411b0e1d0addf7f56f089e4ff0edaa5db1bc9b4b4846dc3",
+  "summary": {
+    "new": 0,
+    "not_detected": 0,
+    "persisting": 1,
+    "not_comparable": 0,
+    "not_comparable_units": {
+      "installation_finding": 0,
+      "identifier_conflict": 0
+    }
+  },
+  "finding_counts": {
+    "count_basis": "stored_finding",
+    "base": {
+      "stored": 1,
+      "linked": 1,
+      "unlinked": 0
+    },
+    "target": {
+      "stored": 1,
+      "linked": 1,
+      "unlinked": 0
+    }
+  },
+  "comparison_complete": true,
+  "context_changes": [
+    {
+      "tool": "trivy",
+      "field": "tool_version",
+      "base": "synthetic-tool-v1",
+      "target": "synthetic-tool-v1",
+      "state": "same"
+    },
+    {
+      "tool": "trivy",
+      "field": "database_version",
+      "base": "synthetic-db-1",
+      "target": "synthetic-db-1",
+      "state": "same"
+    },
+    {
+      "tool": "osv",
+      "field": "tool_version",
+      "base": "synthetic-tool-v1",
+      "target": "synthetic-tool-v1",
+      "state": "same"
+    },
+    {
+      "tool": "osv",
+      "field": "database_version",
+      "base": null,
+      "target": null,
+      "state": "unknown"
+    }
+  ]
+}

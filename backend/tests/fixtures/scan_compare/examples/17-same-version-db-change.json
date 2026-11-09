@@ -1,0 +1,204 @@
+{
+  "schema_version": "scan-compare-v1",
+  "policy_version": "compare-policy-v1",
+  "project": {
+    "project_id": "94974492-7a7d-5fcd-a5c6-a3b603a76ef1",
+    "name": "compare-contract-demo"
+  },
+  "count_basis": "installation_comparison_item",
+  "installations": [
+    {
+      "installation_id": "installation_945940034c8e24eef97233aa57b418dcc060a27608d25f7ff433c3b02ce66ade",
+      "ecosystem": "npm",
+      "name": "demo-lib",
+      "state": "matched",
+      "location_match": "exact",
+      "location_evidence": null,
+      "version_change": {
+        "kind": "same",
+        "direction": "none"
+      },
+      "flags": [],
+      "base": {
+        "package_id": "eb2d9886-a0ee-5f16-ae51-fb07e7d9bf9f",
+        "lockfile_path": "node_modules/demo-lib",
+        "installed_version": "1.0.0",
+        "relationship": "indirect"
+      },
+      "target": {
+        "package_id": "f0c8b626-9730-5d76-8a6f-38adda03e8a8",
+        "lockfile_path": "node_modules/demo-lib",
+        "installed_version": "1.0.0",
+        "relationship": "indirect"
+      }
+    }
+  ],
+  "items": [
+    {
+      "item_id": "item_751ee6acd0907bb40267437e6c5fa810341e2acc8a088344bf44667c633f15b8",
+      "installation_id": "installation_945940034c8e24eef97233aa57b418dcc060a27608d25f7ff433c3b02ce66ade",
+      "unit": "installation_finding",
+      "status": "new",
+      "reason": "same_version",
+      "base_finding_ids": [],
+      "target_finding_ids": [
+        "b63695a7-de72-5b7c-a5c2-2c54bf935fc6"
+      ],
+      "match": {
+        "kind": "none",
+        "identifiers": [],
+        "candidate_edges": []
+      },
+      "flags": []
+    }
+  ],
+  "finding_catalog": {
+    "base": {},
+    "target": {
+      "b63695a7-de72-5b7c-a5c2-2c54bf935fc6": {
+        "finding_id": "b63695a7-de72-5b7c-a5c2-2c54bf935fc6",
+        "identifiers": [
+          "GHSA-2222-3333-4444"
+        ],
+        "primary_ids": [
+          "GHSA-2222-3333-4444"
+        ],
+        "severity": "HIGH",
+        "source_tools": [
+          "osv",
+          "trivy"
+        ],
+        "manual_review_required": false,
+        "review_reasons": [],
+        "merge_identifiers": [],
+        "reference_urls": []
+      }
+    }
+  },
+  "unlinked_findings": {
+    "base": [],
+    "target": []
+  },
+  "warnings": [],
+  "base": {
+    "scan_id": "788d8fb3-1ad7-5d60-8406-d567dfa67b16",
+    "project_id": "94974492-7a7d-5fcd-a5c6-a3b603a76ef1",
+    "status": "completed",
+    "result_state": "ready",
+    "created_at": "2026-10-30T03:00:00Z",
+    "finished_at": "2026-10-30T03:00:10Z",
+    "input_package_lock_sha256": "c07daa80dc6fbc4708bf74997f7e7726b170adf411bc1604b1be6a7f80f529a5",
+    "normalization_fingerprint": "75709268e6cef140f2370f0ce71fe962aebb6c136aab4261aa827d1f57688462",
+    "inventory_complete": true,
+    "findings_usable": true,
+    "security_complete": true,
+    "absence_eligible": true,
+    "absence_blockers": [],
+    "provenance_status": "verified",
+    "sources": {
+      "trivy": {
+        "status": "completed",
+        "tool_run_id": "c6004469-720b-59b2-8fd0-c61f00370c77",
+        "tool_version": "synthetic-tool-v1",
+        "database_version": "synthetic-db-1",
+        "queried_at": null
+      },
+      "osv": {
+        "status": "completed",
+        "tool_run_id": "4e3d7878-653d-548c-a3f5-5388aa1b4939",
+        "tool_version": "synthetic-tool-v1",
+        "database_version": null,
+        "queried_at": "2026-10-30T03:00:08Z"
+      }
+    },
+    "snapshot_id": "compare_input_a7391f46045a6c5e37306807523f0df5616a6a9a0907fb94efa32a44952585dc"
+  },
+  "target": {
+    "scan_id": "2ff52593-4e4e-5456-bc40-d1b0dc97f510",
+    "project_id": "94974492-7a7d-5fcd-a5c6-a3b603a76ef1",
+    "status": "completed",
+    "result_state": "ready",
+    "created_at": "2026-10-31T03:00:00Z",
+    "finished_at": "2026-10-31T03:00:10Z",
+    "input_package_lock_sha256": "ce5691c2696ea666ce0b5047adeaff15348a2f3c7f1932448591921ab10781ce",
+    "normalization_fingerprint": "c67cd77da0ae8cff06c43c2be9efc5baddcaa217585877fe198e883efc5209bf",
+    "inventory_complete": true,
+    "findings_usable": true,
+    "security_complete": true,
+    "absence_eligible": true,
+    "absence_blockers": [],
+    "provenance_status": "verified",
+    "sources": {
+      "trivy": {
+        "status": "completed",
+        "tool_run_id": "31eb97d8-18c9-5b65-ab2e-3870b0508d35",
+        "tool_version": "synthetic-tool-v1",
+        "database_version": "synthetic-db-2",
+        "queried_at": null
+      },
+      "osv": {
+        "status": "completed",
+        "tool_run_id": "353275f0-0dd1-5782-8d55-26053ac0b22e",
+        "tool_version": "synthetic-tool-v1",
+        "database_version": null,
+        "queried_at": "2026-10-31T03:00:08Z"
+      }
+    },
+    "snapshot_id": "compare_input_68ea97acb7b942aaa67feb1d225da5fd47ede3ae5e61d196eb2085983385b612"
+  },
+  "comparison_id": "compare_a53dba9255fca8725334ad3ed421facdaa208722733a98f0c4e76a22a4bd156b",
+  "summary": {
+    "new": 1,
+    "not_detected": 0,
+    "persisting": 0,
+    "not_comparable": 0,
+    "not_comparable_units": {
+      "installation_finding": 0,
+      "identifier_conflict": 0
+    }
+  },
+  "finding_counts": {
+    "count_basis": "stored_finding",
+    "base": {
+      "stored": 0,
+      "linked": 0,
+      "unlinked": 0
+    },
+    "target": {
+      "stored": 1,
+      "linked": 1,
+      "unlinked": 0
+    }
+  },
+  "comparison_complete": true,
+  "context_changes": [
+    {
+      "tool": "trivy",
+      "field": "tool_version",
+      "base": "synthetic-tool-v1",
+      "target": "synthetic-tool-v1",
+      "state": "same"
+    },
+    {
+      "tool": "trivy",
+      "field": "database_version",
+      "base": "synthetic-db-1",
+      "target": "synthetic-db-2",
+      "state": "changed"
+    },
+    {
+      "tool": "osv",
+      "field": "tool_version",
+      "base": "synthetic-tool-v1",
+      "target": "synthetic-tool-v1",
+      "state": "same"
+    },
+    {
+      "tool": "osv",
+      "field": "database_version",
+      "base": null,
+      "target": null,
+      "state": "unknown"
+    }
+  ]
+}

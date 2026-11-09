@@ -1,0 +1,700 @@
+TAP version 13
+# Subtest: only well-formed GHSA/CVE ids become links
+ok 1 - only well-formed GHSA/CVE ids become links
+  ---
+  duration_ms: 1.303417
+  ...
+# Subtest: sources are de-duplicated with GHSA first per finding
+ok 2 - sources are de-duplicated with GHSA first per finding
+  ---
+  duration_ms: 1.105833
+  ...
+# Subtest: manual generation uses POST and does not send a client API key
+ok 3 - manual generation uses POST and does not send a client API key
+  ---
+  duration_ms: 3.525208
+  ...
+# Subtest: backend configuration errors are understandable
+ok 4 - backend configuration errors are understandable
+  ---
+  duration_ms: 0.496
+  ...
+# Subtest: stale and rejected reports never expose old explanation text
+ok 5 - stale and rejected reports never expose old explanation text
+  ---
+  duration_ms: 0.257417
+  ...
+# Subtest: unranked severity does not become a P grade
+ok 6 - unranked severity does not become a P grade
+  ---
+  duration_ms: 0.892791
+  ...
+# Subtest: package priorities can place the same finding in multiple groups
+ok 7 - package priorities can place the same finding in multiple groups
+  ---
+  duration_ms: 0.144459
+  ...
+# Subtest: unknown, missing package, license and maintenance stay distinct
+ok 8 - unknown, missing package, license and maintenance stay distinct
+  ---
+  duration_ms: 0.329667
+  ...
+# Subtest: old report prose is hidden but individual explanations remain readable
+ok 9 - old report prose is hidden but individual explanations remain readable
+  ---
+  duration_ms: 3.773084
+  ...
+# Subtest: finding read and manual generate address the selected finding only
+ok 10 - finding read and manual generate address the selected finding only
+  ---
+  duration_ms: 1.46075
+  ...
+# Subtest: packages: retrieves all 0 records
+ok 11 - packages: retrieves all 0 records
+  ---
+  duration_ms: 35.777958
+  ...
+# Subtest: packages: retrieves all 500 records
+ok 12 - packages: retrieves all 500 records
+  ---
+  duration_ms: 0.635125
+  ...
+# Subtest: packages: retrieves all 501 records
+ok 13 - packages: retrieves all 501 records
+  ---
+  duration_ms: 0.885875
+  ...
+# Subtest: packages: retrieves all 1001 records
+ok 14 - packages: retrieves all 1001 records
+  ---
+  duration_ms: 1.276958
+  ...
+# Subtest: findings: retrieves all 0 records
+ok 15 - findings: retrieves all 0 records
+  ---
+  duration_ms: 0.434833
+  ...
+# Subtest: findings: retrieves all 500 records
+ok 16 - findings: retrieves all 500 records
+  ---
+  duration_ms: 1.252125
+  ...
+# Subtest: findings: retrieves all 501 records
+ok 17 - findings: retrieves all 501 records
+  ---
+  duration_ms: 1.456167
+  ...
+# Subtest: findings: retrieves all 1001 records
+ok 18 - findings: retrieves all 1001 records
+  ---
+  duration_ms: 2.133791
+  ...
+# Subtest: maintenance: retrieves all 0 records
+ok 19 - maintenance: retrieves all 0 records
+  ---
+  duration_ms: 0.5185
+  ...
+# Subtest: maintenance: retrieves all 500 records
+ok 20 - maintenance: retrieves all 500 records
+  ---
+  duration_ms: 0.850292
+  ...
+# Subtest: maintenance: retrieves all 501 records
+ok 21 - maintenance: retrieves all 501 records
+  ---
+  duration_ms: 1.681208
+  ...
+# Subtest: maintenance: retrieves all 1001 records
+ok 22 - maintenance: retrieves all 1001 records
+  ---
+  duration_ms: 0.920208
+  ...
+# Subtest: a failed second page is not returned as a complete list
+ok 23 - a failed second page is not returned as a complete list
+  ---
+  duration_ms: 0.825958
+  ...
+# Subtest: empty page before total is reached reports an error
+ok 24 - empty page before total is reached reports an error
+  ---
+  duration_ms: 0.218166
+  ...
+# Subtest: failed SBOM response is not saved as a file
+ok 25 - failed SBOM response is not saved as a file
+  ---
+  duration_ms: 0.2655
+  ...
+# Subtest: successful SBOM preserves content
+ok 26 - successful SBOM preserves content
+  ---
+  duration_ms: 1.06375
+  ...
+# Subtest: 취약점 유형만 고른다
+ok 27 - 취약점 유형만 고른다
+  ---
+  duration_ms: 2.211125
+  ...
+# Subtest: 심각도 건수: 모르는 값은 UNKNOWN
+ok 28 - 심각도 건수: 모르는 값은 UNKNOWN
+  ---
+  duration_ms: 0.243583
+  ...
+# Subtest: 가장 급한 우선순위, 계산 전이면 null
+ok 29 - 가장 급한 우선순위, 계산 전이면 null
+  ---
+  duration_ms: 0.233625
+  ...
+# Subtest: 먼저 볼 항목은 우선순위 순, 같으면 심각도 순, P3·INFO·산정 전 제외
+ok 30 - 먼저 볼 항목은 우선순위 순, 같으면 심각도 순, P3·INFO·산정 전 제외
+  ---
+  duration_ms: 17.083334
+  ...
+# Subtest: 먼저 볼 항목은 최대 5개
+ok 31 - 먼저 볼 항목은 최대 5개
+  ---
+  duration_ms: 0.334125
+  ...
+# Subtest: 패키지 요약은 루트를 빼고 센다
+ok 32 - 패키지 요약은 루트를 빼고 센다
+  ---
+  duration_ms: 0.173917
+  ...
+# Subtest: 라이선스 요약: 확인 필요와 정보 없음
+ok 33 - 라이선스 요약: 확인 필요와 정보 없음
+  ---
+  duration_ms: 0.422125
+  ...
+# Subtest: 유지보수 요약은 true만 센다(null은 아니오가 아님)
+ok 34 - 유지보수 요약은 true만 센다(null은 아니오가 아님)
+  ---
+  duration_ms: 0.135292
+  ...
+# Subtest: 수정 정보 요약
+ok 35 - 수정 정보 요약
+  ---
+  duration_ms: 1.088333
+  ...
+# Subtest: 끝난 단계 수와 소요 시간
+ok 36 - 끝난 단계 수와 소요 시간
+  ---
+  duration_ms: 0.327208
+  ...
+# Subtest: AI 설명 상태: 자동 대상이 아닌 심각도는 대상 아님
+ok 37 - AI 설명 상태: 자동 대상이 아닌 심각도는 대상 아님
+  ---
+  duration_ms: 0.208791
+  ...
+# Subtest: AI 출력 섹션: 아는 키만 문장, 나머지는 원문
+ok 38 - AI 출력 섹션: 아는 키만 문장, 나머지는 원문
+  ---
+  duration_ms: 0.206625
+  ...
+# Subtest: progress: queued with nothing done is 0%
+ok 39 - progress: queued with nothing done is 0%
+  ---
+  duration_ms: 1.664958
+  ...
+# Subtest: progress: half of the stages done is 50%
+ok 40 - progress: half of the stages done is 50%
+  ---
+  duration_ms: 0.268333
+  ...
+# Subtest: progress: running stage contributes its own detail
+ok 41 - progress: running stage contributes its own detail
+  ---
+  duration_ms: 0.679875
+  ...
+# Subtest: progress: never shows 100% while still active
+ok 42 - progress: never shows 100% while still active
+  ---
+  duration_ms: 0.339958
+  ...
+# Subtest: progress: completed is 100% with no failures
+ok 43 - progress: completed is 100% with no failures
+  ---
+  duration_ms: 0.609458
+  ...
+# Subtest: progress: partial lists failed stages by role name, not tool name
+ok 44 - progress: partial lists failed stages by role name, not tool name
+  ---
+  duration_ms: 0.147916
+  ...
+# Subtest: progress: worker failure before tools is reported (today's permission case)
+ok 45 - progress: worker failure before tools is reported (today's permission case)
+  ---
+  duration_ms: 0.107375
+  ...
+# Subtest: stageProgress: github stage counts use packages as total
+ok 46 - stageProgress: github stage counts use packages as total
+  ---
+  duration_ms: 0.625334
+  ...
+# Subtest: fix candidates: duplicates from two tools collapse to unique values
+ok 47 - fix candidates: duplicates from two tools collapse to unique values
+  ---
+  duration_ms: 0.220167
+  ...
+# Subtest: license: GPL family is review, MIT ok, empty unknown
+ok 48 - license: GPL family is review, MIT ok, empty unknown
+  ---
+  duration_ms: 0.5895
+  ...
+# Subtest: vuln scan failure detection for the 0-finding message
+ok 49 - vuln scan failure detection for the 0-finding message
+  ---
+  duration_ms: 0.168708
+  ...
+# Subtest: ai report: not generated is a neutral message, not an error
+ok 50 - ai report: not generated is a neutral message, not an error
+  ---
+  duration_ms: 0.1475
+  ...
+# Subtest: ai report: only succeeded exposes output
+ok 51 - ai report: only succeeded exposes output
+  ---
+  duration_ms: 0.09825
+  ...
+# Subtest: ai report: fetch error does not claim results are missing
+ok 52 - ai report: fetch error does not claim results are missing
+  ---
+  duration_ms: 0.152041
+  ...
+# Subtest: semver compare including pre-release
+ok 53 - semver compare including pre-release
+  ---
+  duration_ms: 1.603458
+  ...
+# Subtest: form-data 4.0.0 picks only 4.0.4 from its own range
+ok 54 - form-data 4.0.0 picks only 4.0.4 from its own range
+  ---
+  duration_ms: 1.383042
+  ...
+# Subtest: already fixed or outside any range gives no target
+ok 55 - already fixed or outside any range gives no target
+  ---
+  duration_ms: 0.131
+  ...
+# Subtest: tool expressions alone (no range) are not enough to build a command
+ok 56 - tool expressions alone (no range) are not enough to build a command
+  ---
+  duration_ms: 0.654792
+  ...
+# Subtest: indirect package: inspect + update, never a direct npm install
+ok 57 - indirect package: inspect + update, never a direct npm install
+  ---
+  duration_ms: 0.369584
+  ...
+# Subtest: direct package: npm install with the range-verified version
+ok 58 - direct package: npm install with the range-verified version
+  ---
+  duration_ms: 0.323083
+  ...
+# Subtest: no fix info: no command (request 2.88.2 case)
+ok 59 - no fix info: no command (request 2.88.2 case)
+  ---
+  duration_ms: 0.073208
+  ...
+# Subtest: unsafe package names or versions never reach a command
+ok 60 - unsafe package names or versions never reach a command
+  ---
+  duration_ms: 0.142834
+  ...
+# Subtest: unknown relationship does not get a command
+ok 61 - unknown relationship does not get a command
+  ---
+  duration_ms: 0.842375
+  ...
+# Subtest: route hash round trip
+ok 62 - route hash round trip
+  ---
+  duration_ms: 0.661625
+  ...
+# Subtest: finding label prefers canonical id, then identifiers
+ok 63 - finding label prefers canonical id, then identifiers
+  ---
+  duration_ms: 0.207292
+  ...
+# Subtest: keeps all findings, mixed installations, candidate provenance and scope without claiming a common fix
+ok 64 - keeps all findings, mixed installations, candidate provenance and scope without claiming a common fix
+  ---
+  duration_ms: 3.322708
+  ...
+# Subtest: partial result, unavailable rank and pending review stay explicit
+ok 65 - partial result, unavailable rank and pending review stay explicit
+  ---
+  duration_ms: 2.604667
+  ...
+# Subtest: blocks unready processing
+ok 66 - blocks unready processing
+  ---
+  duration_ms: 0.409417
+  ...
+# Subtest: blocks unready failed
+ok 67 - blocks unready failed
+  ---
+  duration_ms: 0.130833
+  ...
+# Subtest: blocks unready unavailable
+ok 68 - blocks unready unavailable
+  ---
+  duration_ms: 0.278917
+  ...
+# Subtest: blocks missing or duplicated findings and missing installation evidence
+ok 69 - blocks missing or duplicated findings and missing installation evidence
+  ---
+  duration_ms: 0.323417
+  ...
+# Subtest: untrusted names and paths are serialized as data, not interpolated instructions
+ok 70 - untrusted names and paths are serialized as data, not interpolated instructions
+  ---
+  duration_ms: 0.288375
+  ...
+# Subtest: all pages and unlinked rows use one snapshot; ranks remain unchanged
+ok 71 - all pages and unlinked rows use one snapshot; ranks remain unchanged
+  ---
+  duration_ms: 50.962708
+  ...
+# Subtest: 409 or failed later requests never return a partial successful catalog
+ok 72 - 409 or failed later requests never return a partial successful catalog
+  ---
+  duration_ms: 1.155667
+  ...
+# Subtest: processing is preserved rather than converted to normal zero findings
+ok 73 - processing is preserved rather than converted to normal zero findings
+  ---
+  duration_ms: 0.54025
+  ...
+# Subtest: changed snapshot and duplicate pagination are rejected
+ok 74 - changed snapshot and duplicate pagination are rejected
+  ---
+  duration_ms: 3.648667
+  ...
+# Subtest: group detail requests pass the snapshot and stable group routes survive reload
+ok 75 - group detail requests pass the snapshot and stable group routes survive reload
+  ---
+  duration_ms: 1.940666
+  ...
+# Subtest: groups by name and version, counts a finding once per group across install paths
+ok 76 - groups by name and version, counts a finding once per group across install paths
+  ---
+  duration_ms: 28.42425
+  ...
+# Subtest: retains missing links and UNKNOWN; never infers grade from severity
+ok 77 - retains missing links and UNKNOWN; never infers grade from severity
+  ---
+  duration_ms: 0.185166
+  ...
+# Subtest: representative grade uses only this package links and preserves stored order
+ok 78 - representative grade uses only this package links and preserves stored order
+  ---
+  duration_ms: 0.3465
+  ...
+# Subtest: identifier search retains full package counts and all related findings
+ok 79 - identifier search retains full package counts and all related findings
+  ---
+  duration_ms: 0.182709
+  ...
+# Subtest: display ranks are global package positions, preserved after search and filtering
+ok 80 - display ranks are global package positions, preserved after search and filtering
+  ---
+  duration_ms: 0.843083
+  ...
+# Subtest: common fix is the highest confirmed fix that clears every range, not the latest release
+ok 81 - common fix is the highest confirmed fix that clears every range, not the latest release
+  ---
+  duration_ms: 0.766
+  ...
+# Subtest: a candidate that falls inside another advisory range is rejected
+ok 82 - a candidate that falls inside another advisory range is rejected
+  ---
+  duration_ms: 0.372583
+  ...
+# Subtest: missing fix information makes the result partial, never all
+ok 83 - missing fix information makes the result partial, never all
+  ---
+  duration_ms: 0.136875
+  ...
+# Subtest: no confirmed range gives none; open-ended ranges count as affected
+ok 84 - no confirmed range gives none; open-ended ranges count as affected
+  ---
+  duration_ms: 1.220667
+  ...
+# Subtest: major and 0.x minor changes are flagged; indirect packages mention parent updates
+ok 85 - major and 0.x minor changes are flagged; indirect packages mention parent updates
+  ---
+  duration_ms: 0.786667
+  ...
+# Subtest: advisories with no known fix stay uncovered instead of blocking the common version
+ok 86 - advisories with no known fix stay uncovered instead of blocking the common version
+  ---
+  duration_ms: 0.289666
+  ...
+# Subtest: fix guidance is scoped to an exact candidate despite later reintroduction
+ok 87 - fix guidance is scoped to an exact candidate despite later reintroduction
+  ---
+  duration_ms: 0.548333
+  ...
+# Subtest: only the global first five have ranks, including ties within the same grade
+ok 88 - only the global first five have ranks, including ties within the same grade
+  ---
+  duration_ms: 8.837416
+  ...
+# Subtest: representative package matches priority and candidate instead of first package
+ok 89 - representative package matches priority and candidate instead of first package
+  ---
+  duration_ms: 0.578834
+  ...
+# Subtest: first look follows stored rank inside a grade
+ok 90 - first look follows stored rank inside a grade
+  ---
+  duration_ms: 1.15225
+  ...
+# Subtest: failed and uncomputed messages are distinct
+ok 91 - failed and uncomputed messages are distinct
+  ---
+  duration_ms: 0.187417
+  ...
+# Subtest: priority groups use stored grades and rank, not severity
+ok 92 - priority groups use stored grades and rank, not severity
+  ---
+  duration_ms: 2.449083
+  ...
+# Subtest: findings route survives reload
+ok 93 - findings route survives reload
+  ---
+  duration_ms: 2.472708
+  ...
+# Subtest: licenses route survives reload
+ok 94 - licenses route survives reload
+  ---
+  duration_ms: 0.264834
+  ...
+# Subtest: maintenance route survives reload
+ok 95 - maintenance route survives reload
+  ---
+  duration_ms: 0.218708
+  ...
+# Subtest: packages route survives reload
+ok 96 - packages route survives reload
+  ---
+  duration_ms: 0.075833
+  ...
+# Subtest: unknown section does not produce a list route
+ok 97 - unknown section does not produce a list route
+  ---
+  duration_ms: 0.097542
+  ...
+# Subtest: package routes round-trip, including scoped names
+ok 98 - package routes round-trip, including scoped names
+  ---
+  duration_ms: 0.166167
+  ...
+# Subtest: compare 1.0.0-beta.10 / 1.0.0-beta.2
+ok 99 - compare 1.0.0-beta.10 / 1.0.0-beta.2
+  ---
+  duration_ms: 1.748333
+  ...
+# Subtest: compare 1.0.0-alpha / 1.0.0-alpha.1
+ok 100 - compare 1.0.0-alpha / 1.0.0-alpha.1
+  ---
+  duration_ms: 0.094125
+  ...
+# Subtest: compare 1.0.0-1 / 1.0.0-alpha
+ok 101 - compare 1.0.0-1 / 1.0.0-alpha
+  ---
+  duration_ms: 0.349875
+  ...
+# Subtest: compare 1.0.0-rc.1 / 1.0.0
+ok 102 - compare 1.0.0-rc.1 / 1.0.0
+  ---
+  duration_ms: 0.1835
+  ...
+# Subtest: compare 1.0.0+one / 1.0.0+two
+ok 103 - compare 1.0.0+one / 1.0.0+two
+  ---
+  duration_ms: 0.0695
+  ...
+# Subtest: compare 1.0.0-beta.2 / 1.0.0-beta.10
+ok 104 - compare 1.0.0-beta.2 / 1.0.0-beta.10
+  ---
+  duration_ms: 0.06525
+  ...
+# Subtest: compare 9007199254740992.0.0 / 9007199254740993.0.0
+ok 105 - compare 9007199254740992.0.0 / 9007199254740993.0.0
+  ---
+  duration_ms: 0.177416
+  ...
+# Subtest: compare 1.0.0-9007199254740992 / 1.0.0-9007199254740993
+ok 106 - compare 1.0.0-9007199254740992 / 1.0.0-9007199254740993
+  ---
+  duration_ms: 0.065167
+  ...
+# Subtest: compare v1.0.0 / 1.0.0
+ok 107 - compare v1.0.0 / 1.0.0
+  ---
+  duration_ms: 0.185792
+  ...
+# Subtest: compare 1.0.0-Alpha / 1.0.0-alpha
+ok 108 - compare 1.0.0-Alpha / 1.0.0-alpha
+  ---
+  duration_ms: 0.143875
+  ...
+# Subtest: compare 01.0.0 / 1.0.0
+ok 109 - compare 01.0.0 / 1.0.0
+  ---
+  duration_ms: 0.060334
+  ...
+# Subtest: compare 1.01.0 / 1.0.0
+ok 110 - compare 1.01.0 / 1.0.0
+  ---
+  duration_ms: 0.0425
+  ...
+# Subtest: compare 1.0.01 / 1.0.0
+ok 111 - compare 1.0.01 / 1.0.0
+  ---
+  duration_ms: 0.039041
+  ...
+# Subtest: compare 1.0.0-beta.02 / 1.0.0
+ok 112 - compare 1.0.0-beta.02 / 1.0.0
+  ---
+  duration_ms: 0.18975
+  ...
+# Subtest: compare 1.0.0-a..b / 1.0.0
+ok 113 - compare 1.0.0-a..b / 1.0.0
+  ---
+  duration_ms: 0.041834
+  ...
+# Subtest: compare 1.0.0+ / 1.0.0
+ok 114 - compare 1.0.0+ / 1.0.0
+  ---
+  duration_ms: 0.052625
+  ...
+# Subtest: compare 1.0 / 1.0.0
+ok 115 - compare 1.0 / 1.0.0
+  ---
+  duration_ms: 0.188125
+  ...
+# Subtest: compare unknown / 1.0.0
+ok 116 - compare unknown / 1.0.0
+  ---
+  duration_ms: 0.207917
+  ...
+# Subtest: compare 1.0.0- / 1.0.0
+ok 117 - compare 1.0.0- / 1.0.0
+  ---
+  duration_ms: 0.056041
+  ...
+# Subtest: compare 1.0.0+one..two / 1.0.0
+ok 118 - compare 1.0.0+one..two / 1.0.0
+  ---
+  duration_ms: 0.18475
+  ...
+# Subtest: compare null / 1.0.0
+ok 119 - compare null / 1.0.0
+  ---
+  duration_ms: 0.040166
+  ...
+# Subtest: compare true / 1.0.0
+ok 120 - compare true / 1.0.0
+  ---
+  duration_ms: 0.034291
+  ...
+# Subtest: no prerelease downgrade
+ok 121 - no prerelease downgrade
+  ---
+  duration_ms: 0.302875
+  ...
+# Subtest: prerelease upgrade
+ok 122 - prerelease upgrade
+  ---
+  duration_ms: 0.085792
+  ...
+# Subtest: reintroduced later
+ok 123 - reintroduced later
+  ---
+  duration_ms: 0.250625
+  ...
+# Subtest: reintroduced installed
+ok 124 - reintroduced installed
+  ---
+  duration_ms: 0.064125
+  ...
+# Subtest: exact fixed boundary
+ok 125 - exact fixed boundary
+  ---
+  duration_ms: 0.039292
+  ...
+# Subtest: last affected inclusive
+ok 126 - last affected inclusive
+  ---
+  duration_ms: 0.042292
+  ...
+# Subtest: limit is not fix
+ok 127 - limit is not fix
+  ---
+  duration_ms: 0.039584
+  ...
+# Subtest: open ended
+ok 128 - open ended
+  ---
+  duration_ms: 0.039
+  ...
+# Subtest: no evidence
+ok 129 - no evidence
+  ---
+  duration_ms: 0.0345
+  ...
+# Subtest: bad introduced
+ok 130 - bad introduced
+  ---
+  duration_ms: 0.036417
+  ...
+# Subtest: bad fixed
+ok 131 - bad fixed
+  ---
+  duration_ms: 0.044375
+  ...
+# Subtest: empty
+ok 132 - empty
+  ---
+  duration_ms: 0.034167
+  ...
+# Subtest: double introduced
+ok 133 - double introduced
+  ---
+  duration_ms: 0.064708
+  ...
+# Subtest: no introduced
+ok 134 - no introduced
+  ---
+  duration_ms: 0.0425
+  ...
+# Subtest: backwards
+ok 135 - backwards
+  ---
+  duration_ms: 0.047375
+  ...
+# Subtest: multi event keys
+ok 136 - multi event keys
+  ---
+  duration_ms: 0.035792
+  ...
+# Subtest: unknown event
+ok 137 - unknown event
+  ---
+  duration_ms: 0.169208
+  ...
+# Subtest: non string
+ok 138 - non string
+  ---
+  duration_ms: 0.035583
+  ...
+1..138
+# tests 138
+# suites 0
+# pass 138
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 377.443167

@@ -1,0 +1,8 @@
+{
+  "detail": {
+    "code": "different_project",
+    "message": "같은 프로젝트의 검사끼리 비교할 수 있습니다.",
+    "scan_ids": [],
+    "limit": null
+  }
+}

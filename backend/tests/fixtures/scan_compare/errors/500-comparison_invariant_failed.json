@@ -1,0 +1,8 @@
+{
+  "detail": {
+    "code": "comparison_invariant_failed",
+    "message": "검사 자료의 일관성을 확인할 수 없습니다.",
+    "scan_ids": [],
+    "limit": null
+  }
+}

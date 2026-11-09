@@ -1,0 +1,478 @@
+[
+  {
+    "case": "01-persisting",
+    "summary": {
+      "new": 0,
+      "not_detected": 0,
+      "persisting": 1,
+      "not_comparable": 0,
+      "not_comparable_units": {
+        "installation_finding": 0,
+        "identifier_conflict": 0
+      }
+    },
+    "finding_counts": {
+      "count_basis": "stored_finding",
+      "base": {
+        "stored": 1,
+        "linked": 1,
+        "unlinked": 0
+      },
+      "target": {
+        "stored": 1,
+        "linked": 1,
+        "unlinked": 0
+      }
+    },
+    "comparison_complete": true,
+    "matches_contract": true
+  },
+  {
+    "case": "02-version-not-detected",
+    "summary": {
+      "new": 0,
+      "not_detected": 1,
+      "persisting": 0,
+      "not_comparable": 0,
+      "not_comparable_units": {
+        "installation_finding": 0,
+        "identifier_conflict": 0
+      }
+    },
+    "finding_counts": {
+      "count_basis": "stored_finding",
+      "base": {
+        "stored": 1,
+        "linked": 1,
+        "unlinked": 0
+      },
+      "target": {
+        "stored": 0,
+        "linked": 0,
+        "unlinked": 0
+      }
+    },
+    "comparison_complete": true,
+    "matches_contract": true
+  },
+  {
+    "case": "03-added-removed",
+    "summary": {
+      "new": 1,
+      "not_detected": 1,
+      "persisting": 0,
+      "not_comparable": 0,
+      "not_comparable_units": {
+        "installation_finding": 0,
+        "identifier_conflict": 0
+      }
+    },
+    "finding_counts": {
+      "count_basis": "stored_finding",
+      "base": {
+        "stored": 1,
+        "linked": 1,
+        "unlinked": 0
+      },
+      "target": {
+        "stored": 1,
+        "linked": 1,
+        "unlinked": 0
+      }
+    },
+    "comparison_complete": true,
+    "matches_contract": true
+  },
+  {
+    "case": "04-target-partial",
+    "summary": {
+      "new": 0,
+      "not_detected": 0,
+      "persisting": 1,
+      "not_comparable": 1,
+      "not_comparable_units": {
+        "installation_finding": 1,
+        "identifier_conflict": 0
+      }
+    },
+    "finding_counts": {
+      "count_basis": "stored_finding",
+      "base": {
+        "stored": 2,
+        "linked": 2,
+        "unlinked": 0
+      },
+      "target": {
+        "stored": 1,
+        "linked": 1,
+        "unlinked": 0
+      }
+    },
+    "comparison_complete": false,
+    "matches_contract": true
+  },
+  {
+    "case": "05-identifier-conflict",
+    "summary": {
+      "new": 0,
+      "not_detected": 0,
+      "persisting": 0,
+      "not_comparable": 1,
+      "not_comparable_units": {
+        "installation_finding": 0,
+        "identifier_conflict": 1
+      }
+    },
+    "finding_counts": {
+      "count_basis": "stored_finding",
+      "base": {
+        "stored": 1,
+        "linked": 1,
+        "unlinked": 0
+      },
+      "target": {
+        "stored": 2,
+        "linked": 2,
+        "unlinked": 0
+      }
+    },
+    "comparison_complete": false,
+    "matches_contract": true
+  },
+  {
+    "case": "06-location-inferred",
+    "summary": {
+      "new": 0,
+      "not_detected": 0,
+      "persisting": 1,
+      "not_comparable": 0,
+      "not_comparable_units": {
+        "installation_finding": 0,
+        "identifier_conflict": 0
+      }
+    },
+    "finding_counts": {
+      "count_basis": "stored_finding",
+      "base": {
+        "stored": 1,
+        "linked": 1,
+        "unlinked": 0
+      },
+      "target": {
+        "stored": 1,
+        "linked": 1,
+        "unlinked": 0
+      }
+    },
+    "comparison_complete": true,
+    "matches_contract": true
+  },
+  {
+    "case": "07-two-installations",
+    "summary": {
+      "new": 0,
+      "not_detected": 0,
+      "persisting": 2,
+      "not_comparable": 0,
+      "not_comparable_units": {
+        "installation_finding": 0,
+        "identifier_conflict": 0
+      }
+    },
+    "finding_counts": {
+      "count_basis": "stored_finding",
+      "base": {
+        "stored": 1,
+        "linked": 1,
+        "unlinked": 0
+      },
+      "target": {
+        "stored": 1,
+        "linked": 1,
+        "unlinked": 0
+      }
+    },
+    "comparison_complete": true,
+    "matches_contract": true
+  },
+  {
+    "case": "08-version-unknown",
+    "summary": {
+      "new": 0,
+      "not_detected": 0,
+      "persisting": 0,
+      "not_comparable": 2,
+      "not_comparable_units": {
+        "installation_finding": 2,
+        "identifier_conflict": 0
+      }
+    },
+    "finding_counts": {
+      "count_basis": "stored_finding",
+      "base": {
+        "stored": 1,
+        "linked": 1,
+        "unlinked": 0
+      },
+      "target": {
+        "stored": 1,
+        "linked": 1,
+        "unlinked": 0
+      }
+    },
+    "comparison_complete": false,
+    "matches_contract": true
+  },
+  {
+    "case": "09-distinct-ghsa",
+    "summary": {
+      "new": 1,
+      "not_detected": 1,
+      "persisting": 0,
+      "not_comparable": 0,
+      "not_comparable_units": {
+        "installation_finding": 0,
+        "identifier_conflict": 0
+      }
+    },
+    "finding_counts": {
+      "count_basis": "stored_finding",
+      "base": {
+        "stored": 1,
+        "linked": 1,
+        "unlinked": 0
+      },
+      "target": {
+        "stored": 1,
+        "linked": 1,
+        "unlinked": 0
+      }
+    },
+    "comparison_complete": true,
+    "matches_contract": true
+  },
+  {
+    "case": "10-nswg-same-record",
+    "summary": {
+      "new": 0,
+      "not_detected": 0,
+      "persisting": 1,
+      "not_comparable": 0,
+      "not_comparable_units": {
+        "installation_finding": 0,
+        "identifier_conflict": 0
+      }
+    },
+    "finding_counts": {
+      "count_basis": "stored_finding",
+      "base": {
+        "stored": 1,
+        "linked": 1,
+        "unlinked": 0
+      },
+      "target": {
+        "stored": 1,
+        "linked": 1,
+        "unlinked": 0
+      }
+    },
+    "comparison_complete": true,
+    "matches_contract": true
+  },
+  {
+    "case": "11-empty-identifiers",
+    "summary": {
+      "new": 0,
+      "not_detected": 0,
+      "persisting": 0,
+      "not_comparable": 2,
+      "not_comparable_units": {
+        "installation_finding": 2,
+        "identifier_conflict": 0
+      }
+    },
+    "finding_counts": {
+      "count_basis": "stored_finding",
+      "base": {
+        "stored": 1,
+        "linked": 1,
+        "unlinked": 0
+      },
+      "target": {
+        "stored": 1,
+        "linked": 1,
+        "unlinked": 0
+      }
+    },
+    "comparison_complete": false,
+    "matches_contract": true
+  },
+  {
+    "case": "12-target-failed",
+    "summary": {
+      "new": 0,
+      "not_detected": 0,
+      "persisting": 0,
+      "not_comparable": 1,
+      "not_comparable_units": {
+        "installation_finding": 1,
+        "identifier_conflict": 0
+      }
+    },
+    "finding_counts": {
+      "count_basis": "stored_finding",
+      "base": {
+        "stored": 1,
+        "linked": 1,
+        "unlinked": 0
+      },
+      "target": {
+        "stored": null,
+        "linked": null,
+        "unlinked": null
+      }
+    },
+    "comparison_complete": false,
+    "matches_contract": true
+  },
+  {
+    "case": "13-unlinked",
+    "summary": {
+      "new": 0,
+      "not_detected": 0,
+      "persisting": 0,
+      "not_comparable": 1,
+      "not_comparable_units": {
+        "installation_finding": 1,
+        "identifier_conflict": 0
+      }
+    },
+    "finding_counts": {
+      "count_basis": "stored_finding",
+      "base": {
+        "stored": 1,
+        "linked": 1,
+        "unlinked": 0
+      },
+      "target": {
+        "stored": 1,
+        "linked": 0,
+        "unlinked": 1
+      }
+    },
+    "comparison_complete": false,
+    "matches_contract": true
+  },
+  {
+    "case": "14-reference-review",
+    "summary": {
+      "new": 0,
+      "not_detected": 0,
+      "persisting": 0,
+      "not_comparable": 1,
+      "not_comparable_units": {
+        "installation_finding": 0,
+        "identifier_conflict": 1
+      }
+    },
+    "finding_counts": {
+      "count_basis": "stored_finding",
+      "base": {
+        "stored": 1,
+        "linked": 1,
+        "unlinked": 0
+      },
+      "target": {
+        "stored": 1,
+        "linked": 1,
+        "unlinked": 0
+      }
+    },
+    "comparison_complete": false,
+    "matches_contract": true
+  },
+  {
+    "case": "15-confirmed-zero",
+    "summary": {
+      "new": 0,
+      "not_detected": 0,
+      "persisting": 0,
+      "not_comparable": 0,
+      "not_comparable_units": {
+        "installation_finding": 0,
+        "identifier_conflict": 0
+      }
+    },
+    "finding_counts": {
+      "count_basis": "stored_finding",
+      "base": {
+        "stored": 0,
+        "linked": 0,
+        "unlinked": 0
+      },
+      "target": {
+        "stored": 0,
+        "linked": 0,
+        "unlinked": 0
+      }
+    },
+    "comparison_complete": true,
+    "matches_contract": true
+  },
+  {
+    "case": "16-legacy-unverified",
+    "summary": {
+      "new": 0,
+      "not_detected": 0,
+      "persisting": 0,
+      "not_comparable": 1,
+      "not_comparable_units": {
+        "installation_finding": 1,
+        "identifier_conflict": 0
+      }
+    },
+    "finding_counts": {
+      "count_basis": "stored_finding",
+      "base": {
+        "stored": null,
+        "linked": null,
+        "unlinked": null
+      },
+      "target": {
+        "stored": 1,
+        "linked": 1,
+        "unlinked": 0
+      }
+    },
+    "comparison_complete": false,
+    "matches_contract": true
+  },
+  {
+    "case": "17-same-version-db-change",
+    "summary": {
+      "new": 1,
+      "not_detected": 0,
+      "persisting": 0,
+      "not_comparable": 0,
+      "not_comparable_units": {
+        "installation_finding": 0,
+        "identifier_conflict": 0
+      }
+    },
+    "finding_counts": {
+      "count_basis": "stored_finding",
+      "base": {
+        "stored": 0,
+        "linked": 0,
+        "unlinked": 0
+      },
+      "target": {
+        "stored": 1,
+        "linked": 1,
+        "unlinked": 0
+      }
+    },
+    "comparison_complete": true,
+    "matches_contract": true
+  }
+]

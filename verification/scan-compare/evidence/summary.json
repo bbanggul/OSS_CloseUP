@@ -1,0 +1,41 @@
+{
+  "date": "2026-11-09",
+  "base_commit": "dec0417c81fb7b22a90a06b63f80f6785656eb8b",
+  "branch": "codex/scan-comparison-api",
+  "all_passed": true,
+  "tests": {
+    "backend": 263,
+    "worker": 240,
+    "frontend": 138
+  },
+  "test_total": 641,
+  "python_subtests": 161,
+  "new_comparison_tests": 91,
+  "postgres_comparison_tests": 27,
+  "contract_scenarios": 17,
+  "skipped": 0,
+  "environment": {
+    "python": "3.12.7",
+    "fastapi": "0.141.1",
+    "psycopg": "3.3.6",
+    "pytest": "9.2.0",
+    "jsonschema": "4.26.0",
+    "httpx": "0.28.1",
+    "postgres": "16-alpine",
+    "node": "v18.20.5"
+  },
+  "source_sha256": {
+    "backend/app/main.py": "53a0c998cc15c5e7502938c50e6b7fb59f9e889a57f6ba84e082ee7fac3e2267",
+    "backend/app/package_reader.py": "270485c3ed78ccd63ee8f955ce8381e2082f007f026c02d8f6a2bf4c2c779dc7",
+    "backend/app/scan_material.py": "78fa83e52aaf7be384fe0b355ecbd01f1ba4b608eefb2f134e108e15f3cf2a8e",
+    "backend/app/scan_compare.py": "118f3df6a725bb4815e89d3a6f8530cad01716f0c0e27041fc18bd9a0d322710",
+    "backend/app/scan_compare_api.py": "093464951b43c6546086504c77b880686722810e13dac414d4c38d6a87171bad",
+    "backend/app/schemas/compare-error.schema.json": "02083ad715800ca2d6ac4dc9aa5ecbc05c6bd3bf2d2ccfe122e5b12f6991c5a5",
+    "backend/app/schemas/compare-response.schema.json": "0927e51c3303713e2176ad8525810ccb40b43dbb26b80c7fc05cf516b69ff42d"
+  },
+  "limitations": [
+    "Local isolated DB/ASGI tests, no deployment",
+    "Recorded scanner evidence replay, no fresh vulnerability DB scan",
+    "No external AI invocation or comparison browser UI"
+  ]
+}
