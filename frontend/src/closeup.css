@@ -467,3 +467,28 @@ button.oc-card:focus-visible { outline: 2px solid var(--oc-sea); outline-offset:
 .oc-scan-name small { flex-basis:100%; }
 .oc-scan-name form { display:flex; flex-wrap:wrap; gap:8px; }
 .oc-scan-name input { min-width:0; width:220px; max-width:100%; padding:10px; border:1px solid var(--oc-line-strong); border-radius:8px; font:inherit; }
+
+/* Compact comparison controls and result cards. */
+.oc .oc-compare { padding:20px; font-size:14px; line-height:1.5; }
+.oc .oc-compare h2 { font-size:18px; margin:18px 0 10px; }
+.oc .oc-compare .oc-btn { font-size:12px; padding:5px 10px; min-height:30px; }
+.oc-compare th, .oc-compare td { padding:9px 10px; }
+.oc-compare-actions { gap:8px; margin:12px 0; }
+.oc-comparison-list { gap:10px; margin:16px 0; }
+.oc-comparison-item { padding:14px 16px; border-radius:10px; }
+.oc .oc-comparison-item h3 { font-size:16px; }
+.oc .oc-comparison-item p { margin:8px 0; }
+.oc-comparison-status { font-size:12px; padding:3px 8px; }
+.oc-comparison-findings { font-size:13px; }
+.oc .oc-comparison-item details { margin:8px 0 0; }
+.oc-scan-name { gap:6px; }
+.oc-bulk-fix { padding:16px; margin-bottom:20px; background:#f6f8fc; border:1px solid var(--oc-line); border-radius:12px; }
+.oc-bulk-fix h3 { margin:0 0 12px; font-size:16px; }
+.oc-bulk-controls { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.oc-bulk-controls label { display:flex; gap:6px; align-items:center; }
+.oc-bulk-controls input { width:64px; padding:6px; }
+.oc-bulk-fix .oc-btn { min-height:32px; padding:6px 10px; font-size:12px; }
+.oc-bulk-fix details { margin:12px 0; }
+.oc-bulk-packages { display:grid; gap:8px; max-height:240px; overflow:auto; padding:12px 0; }
+.oc-bulk-packages label { display:flex; gap:8px; overflow-wrap:anywhere; }
+.oc-bulk-fix textarea { display:block; width:100%; box-sizing:border-box; margin:12px 0; padding:12px; }
