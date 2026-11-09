@@ -421,3 +421,12 @@ button.oc-card:focus-visible { outline: 2px solid var(--oc-sea); outline-offset:
 .oc-sources li { font-size: 13px; padding: 2px 0; list-style: disc; margin-left: 18px; }
 .oc-sources a { color: var(--oc-sea); font-family: var(--oc-mono); font-size: 12.5px; }
 .oc-sources a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+/* Scan history and comparison share the existing result panel. */
+.oc-compare-actions { display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin:16px 0; }
+.oc-compare table { width:100%; border-collapse:collapse; text-align:left; }
+.oc-compare th, .oc-compare td { padding:12px; border-bottom:1px solid var(--oc-line, #dfe6ed); vertical-align:top; overflow-wrap:anywhere; }
+.oc-compare .oc-tablewrap { overflow-x:auto; }
+.oc-compare details { margin:16px 0; }
+.oc-compare pre { white-space:pre-wrap; overflow-wrap:anywhere; }
+.oc-compare button[aria-pressed="true"] { border-color:var(--oc-sea); background:#e9f5f4; }

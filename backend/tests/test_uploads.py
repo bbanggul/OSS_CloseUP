@@ -110,3 +110,54 @@ def test_findings_not_found(setup):
     client, _, conn = setup
     conn.cursor.return_value.__enter__.return_value.fetchone.return_value = None
     assert client.get('/scans/00000000-0000-0000-0000-000000000001/findings').status_code==404
+
+
+def test_rescan_reuses_explicit_project_without_overwriting_metadata(setup):
+    client, root, conn = setup
+    project = '11111111-1111-1111-1111-111111111111'
+    conn.execute.return_value.fetchone.return_value = (project,)
+    response = client.post('/scans', files=files(), data={'project_id': project})
+    assert response.status_code == 202, response.text
+    assert response.json()['project_id'] == project
+    calls = conn.execute.call_args_list
+    assert not any('INSERT INTO projects' in call.args[0] or 'UPDATE projects' in call.args[0] for call in calls)
+    insert = next(call for call in calls if 'INSERT INTO scan_runs' in call.args[0])
+    assert str(insert.args[1][1]) == project
+    assert (root / response.json()['scan_id'] / 'package-lock.json').exists()
+
+
+def test_unknown_project_rejected_before_file_writes(setup):
+    client, root, conn = setup
+    conn.execute.return_value.fetchone.return_value = None
+    response = client.post('/scans', files=files(), data={'project_id': '11111111-1111-1111-1111-111111111111'})
+    assert response.status_code == 404
+    assert not list(root.iterdir())
+    assert not any('INSERT' in call.args[0] for call in conn.execute.call_args_list)
+
+
+def test_invalid_project_id_rejected_before_file_writes(setup):
+    client, root, conn = setup
+    response = client.post('/scans', files=files(), data={'project_id': 'bad-id'})
+    assert response.status_code == 422
+    assert not list(root.iterdir())
+    conn.execute.assert_not_called()
+
+
+def test_project_history_scoped_and_paginated(setup):
+    client, _, conn = setup
+    project = '11111111-1111-1111-1111-111111111111'
+    cur = conn.cursor.return_value.__enter__.return_value
+    cur.fetchone.side_effect = [{'project_id': project, 'name': 'demo'}, {'total': 51}]
+    cur.fetchall.return_value = [{'scan_id': '22222222-2222-2222-2222-222222222222', 'project_id': project, 'status': 'completed'}]
+    response = client.get(f'/projects/{project}/scans?limit=50&offset=50')
+    assert response.status_code == 200, response.text
+    assert response.json()['total'] == 51
+    query, params = cur.execute.call_args.args
+    assert 'WHERE project_id=%s' in query and 'ORDER BY created_at DESC, scan_id DESC' in query
+    assert str(params[0]) == project and params[1:] == (50, 50)
+
+
+def test_unknown_project_history_is_not_empty_success(setup):
+    client, _, conn = setup
+    conn.cursor.return_value.__enter__.return_value.fetchone.return_value = None
+    assert client.get('/projects/11111111-1111-1111-1111-111111111111/scans').status_code == 404

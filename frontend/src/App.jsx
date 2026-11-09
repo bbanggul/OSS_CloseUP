@@ -13,6 +13,7 @@ import AiReport from './AiReport'
 import FindingDetail from './FindingDetail'
 import PackageDetail from './PackageDetail'
 import Upload from './Upload'
+import ScanComparison from './ScanComparison'
 import { SummaryCards, SeverityDonut } from './Overview'
 import Icon from './Icons'
 import PackageApiList from './PackageApiList'
@@ -35,6 +36,7 @@ const TABS = [
   ['licenses', '라이선스', 'doc'],
   ['maintenance', '유지보수', 'gear'],
   ['packages', '전체 패키지', 'box'],
+  ['compare', '이전 검사 비교', 'doc'],
 ]
 
 // null은 false가 아니다. 확인되지 않은 값을 '아니오'로 표시하지 않는다.
@@ -266,6 +268,7 @@ function Packages({ data, q }) {
 }
 
 export default function App() {
+  const [uploadProjectId, setUploadProjectId] = useState(null)
   const [scanId, setScanId] = useState(() => parseRoute(window.location.hash).scanId || '')
   const [detailId, setDetailId] = useState(() => parseRoute(window.location.hash).findingId)
   const [pkgRoute, setPkgRoute] = useState(() => parseRoute(window.location.hash).pkg || null)
@@ -390,6 +393,7 @@ export default function App() {
   }
 
   function start(id) {
+    setUploadProjectId(null)
     window.history.pushState(null, '', routeHash(id) || window.location.pathname)
     setDetailId(null)
     setPkgRoute(null)
@@ -400,6 +404,7 @@ export default function App() {
   }
 
   function newScan() {
+    setUploadProjectId(null)
     if (!scanId) return
     window.history.pushState(null, '', window.location.pathname)
     reset()
@@ -489,7 +494,7 @@ export default function App() {
           </div>
         )}
 
-        {view === 'upload' && <Upload onCreated={start} />}
+        {view === 'upload' && <Upload onCreated={start} projectId={uploadProjectId} />}
 
         {view === 'detail' && (
           detailIndex >= 0 ? (
@@ -545,7 +550,8 @@ export default function App() {
                     `검사 ID ${scanId.slice(0, 8)}`].filter(Boolean).join(' · ')}
                 </p>
               </div>
-              {scan && <StatusPill status={scan.status}>{`검사 ${label(scan.status)} · ${stagesDone(scan)}/${STAGES.length} 단계`}</StatusPill>}
+              {scan && <div><StatusPill status={scan.status}>{`검사 ${label(scan.status)} · ${stagesDone(scan)}/${STAGES.length} 단계`}</StatusPill>
+                <button type="button" className="oc-btn" onClick={() => { const id = scan.project_id; newScan(); setUploadProjectId(id) }}>이 프로젝트 재검사</button></div>}
             </div>
 
             <Progress scan={scan} />
@@ -563,7 +569,7 @@ export default function App() {
                 </div>
                 <SeverityDonut vulns={vulns} findings={findings} scan={scan} />
               </div>
-            ) : listPanel}
+            ) : tab === 'compare' ? (scan && <ScanComparison key={scanId} scan={scan} onOpen={start} />) : listPanel}
           </>
         )}
       </main>

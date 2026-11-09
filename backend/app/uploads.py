@@ -7,7 +7,7 @@ from pathlib import Path
 from uuid import UUID, uuid4
 
 import psycopg
-from fastapi import APIRouter, File, HTTPException, UploadFile, Query
+from fastapi import APIRouter, File, HTTPException, UploadFile, Query, Form
 from psycopg.rows import dict_row
 
 from .db import connect
@@ -109,11 +109,19 @@ def validate_pair(package, lock):
 
 
 @router.post('/scans', status_code=202)
-def create_scan(package_json: UploadFile = File(...), package_lock: UploadFile = File(...)):
+def create_scan(package_json: UploadFile = File(...), package_lock: UploadFile = File(...), project_id: UUID | None = Form(None)):
     package_bytes, package = read_json(package_json, 'package.json', PACKAGE_LIMIT)
     lock_bytes, lock = read_json(package_lock, 'package-lock.json', LOCK_LIMIT)
     name = validate_pair(package, lock)
-    project_id, scan_id = uuid4(), uuid4()
+    existing_project = project_id is not None
+    if existing_project:
+        try:
+            with connect() as conn:
+                if conn.execute('SELECT project_id FROM projects WHERE project_id=%s', (project_id,)).fetchone() is None:
+                    raise HTTPException(404, '프로젝트를 찾을 수 없습니다.')
+        except psycopg.Error:
+            raise HTTPException(503, 'DB 조회에 실패했습니다.') from None
+    project_id, scan_id = project_id or uuid4(), uuid4()
     storage = Path(os.environ.get('SCAN_STORAGE_ROOT', '/work/uploads'))
     directory = storage / str(scan_id)
     inputs = [('package_json', 'package.json', package_bytes), ('package_lock', 'package-lock.json', lock_bytes)]
@@ -127,7 +135,8 @@ def create_scan(package_json: UploadFile = File(...), package_lock: UploadFile =
             path.write_bytes(data)
             path.chmod(0o644)  # worker UID differs; shared volume is worker-read-only
         with connect() as conn:
-            conn.execute('INSERT INTO projects (project_id, name, package_json_sha256, package_lock_sha256) VALUES (%s,%s,%s,%s)', (project_id, name, *hashes))
+            if not existing_project:
+                conn.execute('INSERT INTO projects (project_id, name, package_json_sha256, package_lock_sha256) VALUES (%s,%s,%s,%s)', (project_id, name, *hashes))
             conn.execute("INSERT INTO scan_runs (scan_id, project_id, status, input_package_json_sha256, input_package_lock_sha256) VALUES (%s,%s,'queued',%s,%s)", (scan_id, project_id, *hashes))
             for (kind, filename, data), digest in zip(inputs, hashes):
                 conn.execute('INSERT INTO scan_artifacts (scan_id, kind, storage_key, sha256, size_bytes, media_type) VALUES (%s,%s,%s,%s,%s,%s)', (scan_id, kind, f'{scan_id}/{filename}', digest, len(data), 'application/json'))
@@ -239,3 +248,25 @@ def get_findings(scan_id: UUID, limit: int = Query(100, ge=1, le=500), offset: i
     return {'scan_id':str(scan_id),'total':total,'limit':limit,'offset':offset,
             'normalization':scan['tool_status'].get('normalization',{'status':'pending'}),
             'priority_evaluation':priority_state,'items':items}
+
+
+@router.get('/projects/{project_id}/scans')
+def list_project_scans(project_id: UUID, limit: int = Query(50, ge=1, le=500), offset: int = Query(0, ge=0)):
+    try:
+        with connect() as conn:
+            conn.execute('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY')
+            with conn.cursor(row_factory=dict_row) as cur:
+                cur.execute('SELECT project_id, name FROM projects WHERE project_id=%s', (project_id,))
+                project = cur.fetchone()
+                if project is None:
+                    raise HTTPException(404, '프로젝트를 찾을 수 없습니다.')
+                cur.execute('SELECT count(*) AS total FROM scan_runs WHERE project_id=%s', (project_id,))
+                total = cur.fetchone()['total']
+                cur.execute("""SELECT scan_id, project_id, status, created_at, finished_at
+                    FROM scan_runs WHERE project_id=%s
+                    ORDER BY created_at DESC, scan_id DESC LIMIT %s OFFSET %s""", (project_id, limit, offset))
+                items = cur.fetchall()
+    except psycopg.Error:
+        log.exception('Project history lookup failed')
+        raise HTTPException(503, '검사 이력을 불러오지 못했습니다.') from None
+    return {'project': project, 'items': items, 'total': total, 'limit': limit, 'offset': offset}
