@@ -177,7 +177,7 @@ html body #root { max-width: none; margin: 0; padding: 0; text-align: left; }
 .oc-firstlist .t small { font-size: 12px; font-weight: 500; color: var(--oc-muted); }
 .oc-firstlist .d { font-size: 13px; color: var(--oc-sub); }
 
-.oc-donut { align-self: start; display: flex; flex-direction: column; gap: 12px; padding: 20px; }
+.oc-donut { align-self: stretch; box-sizing: border-box; width: 100%; display: flex; flex-direction: column; gap: 12px; padding: 20px; }
 .oc-donut .chart { position: relative; width: 176px; height: 176px; margin: 8px auto; }
 .oc-donut .chart svg { transform: rotate(-90deg); }
 .oc-donut .center { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
@@ -460,3 +460,10 @@ button.oc-card:focus-visible { outline: 2px solid var(--oc-sea); outline-offset:
 .oc-comparison-item dd { margin:0; overflow-wrap:anywhere; }
 .oc-comparison-note { color:#875514; }
 @media(max-width:600px) { .oc .oc-compare { padding:16px; } .oc-comparison-item { padding:16px; } .oc-comparison-item dl { grid-template-columns:1fr; } }
+
+.oc-rescan-banner { box-sizing:border-box; width:100%; word-break:keep-all; }
+.oc-scan-name { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.oc-scan-name strong { overflow-wrap:anywhere; }
+.oc-scan-name small { flex-basis:100%; }
+.oc-scan-name form { display:flex; flex-wrap:wrap; gap:8px; }
+.oc-scan-name input { min-width:0; width:220px; max-width:100%; padding:10px; border:1px solid var(--oc-line-strong); border-radius:8px; font:inherit; }

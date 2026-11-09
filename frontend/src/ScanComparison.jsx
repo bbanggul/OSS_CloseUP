@@ -1,10 +1,37 @@
 import { useEffect, useState } from 'react'
-import { compareScans, getProjectScans } from './api'
+import { compareScans, getProjectScans, renameScan } from './api'
 import { ACTIVE } from './display'
 import { COMPARISON_LABELS, comparisonRows, comparisonError, findingText, comparisonReason } from './scanComparison.js'
 
 const date = value => value ? new Date(value).toLocaleString('ko-KR') : '시각 없음'
 const status = value => ({ completed: '완료', partial: '부분 완료', failed: '실패', queued: '대기', running: '진행 중' }[value] || value)
+
+function ScanName({ item, onSaved }) {
+  const [editing, setEditing] = useState(false)
+  const [name, setName] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  async function save(event) {
+    event.preventDefault()
+    setSaving(true); setError('')
+    try {
+      const updated = await renameScan(item.scan_id, name)
+      onSaved(updated); setEditing(false)
+    } catch (err) { setError(err.message) }
+    finally { setSaving(false) }
+  }
+  return <div className="oc-scan-name">
+    {editing ? <form onSubmit={save}>
+      <input aria-label="검사 이름" maxLength={80} value={name} disabled={saving}
+        placeholder="예: 수정 전 검사" onChange={e => setName(e.target.value)} autoFocus />
+      <button className="oc-btn" disabled={saving}>저장</button>
+      <button type="button" className="oc-btn" disabled={saving} onClick={() => { setEditing(false); setError('') }}>취소</button>
+    </form> : <><strong>{item.display_name || '이름 없는 검사'}</strong>
+      <button className="oc-btn" onClick={() => { setName(item.display_name || ''); setEditing(true) }}>이름 수정</button></>}
+    {error && <p role="alert">{error}</p>}
+    <small title={item.scan_id}>{date(item.created_at)} · {item.scan_id.slice(0, 8)}</small>
+  </div>
+}
 
 export default function ScanComparison({ scan, onOpen }) {
   const [offset, setOffset] = useState(0)
@@ -38,18 +65,20 @@ export default function ScanComparison({ scan, onOpen }) {
   const rows = data ? comparisonRows(data).filter(row => filter === 'all' || row.status === filter) : []
   return <section className="oc-panel oc-compare" aria-label="이전 검사 비교">
     <h2>비교할 검사 선택</h2>
-    <p>현재 검사: {date(scan.created_at)} · {scan.scan_id.slice(0, 8)} · {status(scan.status)}</p>
+    <p>현재 검사: {history?.items.find(item => item.scan_id === scan.scan_id)?.display_name || scan.display_name || '이름 없는 검사'} · {date(scan.created_at)} · {scan.scan_id.slice(0, 8)} · {status(scan.status)}</p>
     <p className="muted">아래 이력에서 현재 결과와 비교할 검사를 선택하세요.</p>
     <button className="oc-btn" onClick={() => setRevision(v => v + 1)}>새로고침</button>
     {historyError && <p role="alert">{historyError}</p>}
     {!history && !historyError && <p role="status">검사 이력을 불러오는 중…</p>}
     {history && <>
-      <div className="oc-tablewrap"><table><thead><tr><th>비교 선택</th><th>검사 시각</th><th>상태</th><th>결과</th></tr></thead>
+      <div className="oc-tablewrap"><table><thead><tr><th>비교 선택</th><th>검사 이름 · 시각</th><th>상태</th><th>결과</th></tr></thead>
         <tbody>{history.items.map(item => <tr key={item.scan_id}>
           <td>{item.scan_id === scan.scan_id ? '현재 검사' : <label><input type="radio" name="base-scan" value={item.scan_id}
             checked={base === item.scan_id} disabled={ACTIVE.has(item.status) || ACTIVE.has(scan.status)}
             onChange={() => { setBase(item.scan_id); setFilter('all') }} /> 비교 대상으로 선택</label>}</td>
-          <td>{date(item.created_at)}<br /><small>{item.scan_id.slice(0, 8)}</small></td><td>{status(item.status)}</td>
+          <td><ScanName item={item} onSaved={updated => setHistoryResult(previous => previous?.key === historyKey ? {
+            ...previous, data: { ...previous.data, items: previous.data.items.map(row => row.scan_id === updated.scan_id ? { ...row, ...updated } : row) },
+          } : previous)} /></td><td>{status(item.status)}</td>
           <td><button className="oc-btn" onClick={() => onOpen(item.scan_id)}>열기</button></td>
         </tr>)}</tbody></table></div>
       {history.total < 2 && <p>아직 비교할 검사가 없습니다. 이 프로젝트로 재검사하면 이력이 추가됩니다.</p>}
@@ -57,13 +86,12 @@ export default function ScanComparison({ scan, onOpen }) {
         <span>전체 {history.total}개 검사</span><button className="oc-btn" disabled={offset + 50 >= history.total} onClick={() => setOffset(v => v + 50)}>다음 이력</button></div>
     </>}
     {ACTIVE.has(scan.status) && <p role="status">현재 검사가 끝나면 비교할 수 있습니다.</p>}
-    {base && <p>비교 대상 ID: <code>{base.slice(0, 8)}</code></p>}
+    {base && <p>비교 대상: {history?.items.find(item => item.scan_id === base)?.display_name || base.slice(0, 8)}</p>}
     {error && <p role="alert" className="oc-alert">{error}</p>}
     {base && !data && !error && <p role="status">비교 결과를 불러오는 중…</p>}
     {data && <>
       <h2>검사 비교 결과</h2>
       <p>이전 {date(data.base.created_at)} / 현재 {date(data.target.created_at)}</p>
-      <p className="oc-hint">‘현재 미발견’은 이번 검사 결과이며, 수정 완료를 뜻하지는 않습니다.</p>
       {!data.comparison_complete && <p role="status" className="oc-alert">비교하지 못한 항목이 있습니다. 해당 항목의 상세 내용을 확인하세요.</p>}
       {data.warnings.includes('base_after_target') && <p role="status">비교 대상으로 선택한 결과가 현재 검사보다 나중에 실행됐습니다. 선택한 방향으로 비교합니다.</p>}
       <div className="oc-compare-actions" aria-label="비교 항목 필터">

@@ -133,3 +133,8 @@ export const getProjectScans = (projectId, offset = 0, signal) => request(
   `/projects/${encodeURIComponent(projectId)}/scans?limit=50&offset=${offset}`, { signal })
 export const compareScans = (target, base, signal) => request(
   `/scans/${encodeURIComponent(target)}/compare?base=${encodeURIComponent(base)}`, { signal })
+
+export const renameScan = (scanId, displayName) => request(`/scans/${encodeURIComponent(scanId)}`, {
+  method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ display_name: displayName }),
+})

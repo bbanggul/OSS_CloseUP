@@ -161,3 +161,28 @@ def test_unknown_project_history_is_not_empty_success(setup):
     client, _, conn = setup
     conn.cursor.return_value.__enter__.return_value.fetchone.return_value = None
     assert client.get('/projects/11111111-1111-1111-1111-111111111111/scans').status_code == 404
+
+@pytest.mark.parametrize('name, stored', [('  수정 전 검사  ', '수정 전 검사'), ('   ', None)])
+def test_rename_scan_persists_trimmed_name(setup, name, stored):
+    client, _, conn = setup
+    scan_id = '00000000-0000-0000-0000-000000000001'
+    cur = conn.cursor.return_value.__enter__.return_value
+    cur.fetchone.return_value = {'scan_id': scan_id, 'display_name': stored}
+    response = client.patch(f'/scans/{scan_id}', json={'display_name': name})
+    assert response.status_code == 200
+    assert response.json()['display_name'] == stored
+    query, params = cur.execute.call_args.args
+    assert 'UPDATE scan_runs SET display_name=%s WHERE scan_id=%s' in query
+    assert params[0] == stored and str(params[1]) == scan_id
+
+@pytest.mark.parametrize('body', [{}, {'display_name': 'a' * 81}, {'display_name': 'bad\nname'}, {'display_name': None}])
+def test_rename_invalid_name_has_no_writes(setup, body):
+    client, _, conn = setup
+    assert client.patch('/scans/00000000-0000-0000-0000-000000000001', json=body).status_code == 422
+    conn.cursor.assert_not_called()
+
+
+def test_rename_missing_scan(setup):
+    client, _, conn = setup
+    conn.cursor.return_value.__enter__.return_value.fetchone.return_value = None
+    assert client.patch('/scans/00000000-0000-0000-0000-000000000001', json={'display_name': '검사'}).status_code == 404

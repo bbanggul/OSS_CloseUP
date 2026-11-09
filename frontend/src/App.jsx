@@ -569,9 +569,9 @@ export default function App() {
                 <div className="oc-col">
                   <SeverityDonut vulns={vulns} findings={findings} scan={scan} />
                   {scan && <section className="oc-rescan-banner" aria-label="프로젝트 재검사">
-                    <h2>수정한 프로젝트를 다시 검사해 보세요</h2>
-                    <p>이전 결과를 보관하고, 새 검사와 비교할 수 있습니다.</p>
-                    <button type="button" className="oc-btn primary" onClick={() => { const id = scan.project_id; newScan(); setUploadProjectId(id) }}>이 프로젝트 재검사</button>
+                    <h2>프로젝트 재검사</h2>
+                    <p>검사 이력 보관 · 이전 결과 비교</p>
+                    <button type="button" className="oc-btn primary" onClick={() => { const id = scan.project_id; newScan(); setUploadProjectId(id) }}>재검사 시작</button>
                   </section>}
                 </div>
               </div>

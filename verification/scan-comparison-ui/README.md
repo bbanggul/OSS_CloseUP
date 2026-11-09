@@ -26,3 +26,10 @@ node verification/scan-comparison-ui/browser.mjs
 현재 작업 환경에서는 Chromium이 socket 생성 제한으로 시작하지 못해 이 브라우저 검증은 **미실행**입니다. EC2 배포 및 업로드→worker 실행→비교의 실제 서버 검증도 미실행입니다.
 
 PR #7의 DB 검증 수치를 이번 변경의 재검증 결과로 합산하지 않습니다. worker 탐지 로직과 도구/DB 버전 수집은 변경하지 않았습니다.
+
+## Scan names and layout update
+
+Scan history now supports editing an optional name (80 characters maximum), stored in scan_runs.display_name via PATCH /scans/{id}. Empty names reset to the default label. Apply db/oss_closeup_v2_4_scan_names.sql before deploying the updated backend. Existing scan IDs and results are preserved.
+
+Removed the requested comparison notice; severity distribution stretches to the sidebar width and the rescan banner uses shorter labels.
+Validation: frontend 159 tests, build and lint passed; backend 248 tests and 8 subtests passed, 27 PostgreSQL tests skipped. Browser/EC2 visual verification remains outstanding.

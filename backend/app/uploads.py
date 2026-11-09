@@ -9,6 +9,7 @@ from uuid import UUID, uuid4
 import psycopg
 from fastapi import APIRouter, File, HTTPException, UploadFile, Query, Form
 from psycopg.rows import dict_row
+from pydantic import BaseModel, Field, field_validator
 
 from .db import connect
 from .priority_view import load_priority, present_findings
@@ -154,7 +155,7 @@ def get_scan(scan_id: UUID):
     try:
         with connect() as conn:
             with conn.cursor(row_factory=dict_row) as cur:
-                cur.execute('SELECT scan_id, project_id, status, created_at, started_at, finished_at, tool_status FROM scan_runs WHERE scan_id=%s', (scan_id,))
+                cur.execute('SELECT scan_id, project_id, display_name, status, created_at, started_at, finished_at, tool_status FROM scan_runs WHERE scan_id=%s', (scan_id,))
                 row = cur.fetchone()
     except psycopg.Error:
         log.exception('Scan lookup failed')
@@ -262,7 +263,7 @@ def list_project_scans(project_id: UUID, limit: int = Query(50, ge=1, le=500), o
                     raise HTTPException(404, '프로젝트를 찾을 수 없습니다.')
                 cur.execute('SELECT count(*) AS total FROM scan_runs WHERE project_id=%s', (project_id,))
                 total = cur.fetchone()['total']
-                cur.execute("""SELECT scan_id, project_id, status, created_at, finished_at
+                cur.execute("""SELECT scan_id, project_id, display_name, status, created_at, finished_at
                     FROM scan_runs WHERE project_id=%s
                     ORDER BY created_at DESC, scan_id DESC LIMIT %s OFFSET %s""", (project_id, limit, offset))
                 items = cur.fetchall()
@@ -270,3 +271,30 @@ def list_project_scans(project_id: UUID, limit: int = Query(50, ge=1, le=500), o
         log.exception('Project history lookup failed')
         raise HTTPException(503, '검사 이력을 불러오지 못했습니다.') from None
     return {'project': project, 'items': items, 'total': total, 'limit': limit, 'offset': offset}
+
+
+class ScanNameUpdate(BaseModel):
+    display_name: str = Field(max_length=80)
+
+    @field_validator('display_name')
+    @classmethod
+    def clean_name(cls, value):
+        if any(ord(char) < 32 for char in value):
+            raise ValueError('검사 이름은 한 줄로 입력해 주세요.')
+        return value.strip()
+
+
+@router.patch('/scans/{scan_id}')
+def rename_scan(scan_id: UUID, body: ScanNameUpdate):
+    try:
+        with connect() as conn:
+            with conn.cursor(row_factory=dict_row) as cur:
+                cur.execute('UPDATE scan_runs SET display_name=%s WHERE scan_id=%s RETURNING scan_id, display_name',
+                            (body.display_name or None, scan_id))
+                row = cur.fetchone()
+    except psycopg.Error:
+        log.exception('Scan rename failed')
+        raise HTTPException(503, '검사 이름을 저장하지 못했습니다.') from None
+    if row is None:
+        raise HTTPException(404, '검사를 찾을 수 없습니다.')
+    return row
