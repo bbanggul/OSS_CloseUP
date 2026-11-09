@@ -1,5 +1,5 @@
 export const COMPARISON_LABELS = {
-  new: '새로 발견', persisting: '계속 발견', not_detected: '이번 검사에서 미검출', not_comparable: '비교 불가',
+  new: '새로 발견', persisting: '여전히 발견', not_detected: '현재 미발견', not_comparable: '비교 불가',
 }
 export function findingText(data, side, ids) {
   return ids.map(id => {

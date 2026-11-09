@@ -430,3 +430,33 @@ button.oc-card:focus-visible { outline: 2px solid var(--oc-sea); outline-offset:
 .oc-compare details { margin:16px 0; }
 .oc-compare pre { white-space:pre-wrap; overflow-wrap:anywhere; }
 .oc-compare button[aria-pressed="true"] { border-color:var(--oc-sea); background:#e9f5f4; }
+
+.oc-rescan-banner { padding:24px; border:1px solid var(--oc-line-strong); border-radius:16px; background:#edf7f8; }
+.oc-rescan-banner h2 { font-size:17px; line-height:1.5; margin:0 0 10px; }
+.oc-rescan-banner p { font-size:14px; line-height:1.7; margin:0 0 18px; color:#475569; }
+.oc-rescan-banner .oc-btn { width:100%; justify-content:center; }
+.oc .oc-compare { font-size:15px; line-height:1.7; padding:28px; }
+.oc .oc-compare h2 { font-size:22px; margin:24px 0 12px; }
+.oc .oc-compare h2:first-child { margin-top:0; }
+.oc .oc-compare p { margin:12px 0; }
+.oc .oc-compare .muted, .oc .oc-compare .oc-hint { font-size:14px; color:#526175; }
+.oc .oc-compare .oc-btn { font-size:14px; padding:10px 16px; min-height:44px; }
+.oc-compare-actions button { white-space:nowrap; }
+.oc-comparison-list { display:grid; gap:16px; margin:24px 0; }
+.oc-comparison-item { border:1px solid #dce3eb; border-radius:12px; padding:22px; background:#fff; min-width:0; }
+.oc-comparison-item-head { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:12px; }
+.oc .oc-comparison-item h3 { margin:0; font-size:19px; font-weight:700; overflow-wrap:anywhere; }
+.oc-comparison-status { padding:5px 12px; border-radius:7px; font-size:14px; white-space:nowrap; font-weight:600; }
+.oc-comparison-status.new { color:#9b301e; background:#fff0eb; }
+.oc-comparison-status.persisting { color:#875514; background:#fff7df; }
+.oc-comparison-status.not_detected { color:#225e76; background:#edf6fb; }
+.oc-comparison-status.not_comparable { color:#505a6c; background:#eef0f4; }
+.oc-version-change { display:flex; flex-wrap:wrap; gap:24px; color:#526175; }
+.oc-version-change b { color:#20344c; margin-left:8px; }
+.oc-comparison-findings { overflow-wrap:anywhere; color:#34465d; font-size:15px; }
+.oc .oc-comparison-item details { margin-bottom:0; color:#526175; }
+.oc-comparison-item summary { cursor:pointer; font-weight:600; padding:4px 0; }
+.oc-comparison-item dl { display:grid; grid-template-columns:120px minmax(0,1fr); gap:10px; }
+.oc-comparison-item dd { margin:0; overflow-wrap:anywhere; }
+.oc-comparison-note { color:#875514; }
+@media(max-width:600px) { .oc .oc-compare { padding:16px; } .oc-comparison-item { padding:16px; } .oc-comparison-item dl { grid-template-columns:1fr; } }

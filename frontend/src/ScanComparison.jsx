@@ -37,9 +37,9 @@ export default function ScanComparison({ scan, onOpen }) {
   }, [base, scan.scan_id, pair, scan.status])
   const rows = data ? comparisonRows(data).filter(row => filter === 'all' || row.status === filter) : []
   return <section className="oc-panel oc-compare" aria-label="이전 검사 비교">
-    <h2>같은 프로젝트의 검사 이력</h2>
+    <h2>비교할 검사 선택</h2>
     <p>현재 검사: {date(scan.created_at)} · {scan.scan_id.slice(0, 8)} · {status(scan.status)}</p>
-    <p className="muted">비교할 이전 검사를 선택하세요. 새 결과를 만들려면 위의 ‘이 프로젝트 재검사’를 사용하세요.</p>
+    <p className="muted">아래 이력에서 현재 결과와 비교할 검사를 선택하세요.</p>
     <button className="oc-btn" onClick={() => setRevision(v => v + 1)}>새로고침</button>
     {historyError && <p role="alert">{historyError}</p>}
     {!history && !historyError && <p role="status">검사 이력을 불러오는 중…</p>}
@@ -48,7 +48,7 @@ export default function ScanComparison({ scan, onOpen }) {
         <tbody>{history.items.map(item => <tr key={item.scan_id}>
           <td>{item.scan_id === scan.scan_id ? '현재 검사' : <label><input type="radio" name="base-scan" value={item.scan_id}
             checked={base === item.scan_id} disabled={ACTIVE.has(item.status) || ACTIVE.has(scan.status)}
-            onChange={() => { setBase(item.scan_id); setFilter('all') }} /> 이전 검사로 선택</label>}</td>
+            onChange={() => { setBase(item.scan_id); setFilter('all') }} /> 비교 대상으로 선택</label>}</td>
           <td>{date(item.created_at)}<br /><small>{item.scan_id.slice(0, 8)}</small></td><td>{status(item.status)}</td>
           <td><button className="oc-btn" onClick={() => onOpen(item.scan_id)}>열기</button></td>
         </tr>)}</tbody></table></div>
@@ -57,30 +57,39 @@ export default function ScanComparison({ scan, onOpen }) {
         <span>전체 {history.total}개 검사</span><button className="oc-btn" disabled={offset + 50 >= history.total} onClick={() => setOffset(v => v + 50)}>다음 이력</button></div>
     </>}
     {ACTIVE.has(scan.status) && <p role="status">현재 검사가 끝나면 비교할 수 있습니다.</p>}
-    {base && <p>선택한 이전 검사: <code>{base}</code></p>}
+    {base && <p>비교 대상 ID: <code>{base.slice(0, 8)}</code></p>}
     {error && <p role="alert" className="oc-alert">{error}</p>}
     {base && !data && !error && <p role="status">비교 결과를 불러오는 중…</p>}
     {data && <>
       <h2>검사 비교 결과</h2>
       <p>이전 {date(data.base.created_at)} / 현재 {date(data.target.created_at)}</p>
-      <p className="oc-hint">이번 검사에서 미검출된 항목도 수정 완료나 안전을 보장하지는 않습니다.</p>
-      {!data.comparison_complete && <p role="status" className="oc-alert">일부 항목은 자료 부족이나 검사 실패로 비교할 수 없습니다.</p>}
-      {data.warnings.includes('base_after_target') && <p role="status">이전 검사로 선택한 결과가 현재 검사보다 나중에 실행됐습니다. 선택한 방향으로 비교합니다.</p>}
+      <p className="oc-hint">‘현재 미발견’은 이번 검사 결과이며, 수정 완료를 뜻하지는 않습니다.</p>
+      {!data.comparison_complete && <p role="status" className="oc-alert">비교하지 못한 항목이 있습니다. 해당 항목의 상세 내용을 확인하세요.</p>}
+      {data.warnings.includes('base_after_target') && <p role="status">비교 대상으로 선택한 결과가 현재 검사보다 나중에 실행됐습니다. 선택한 방향으로 비교합니다.</p>}
       <div className="oc-compare-actions" aria-label="비교 항목 필터">
         <button className="oc-btn" aria-pressed={filter === 'all'} onClick={() => setFilter('all')}>전체 {data.items.length}</button>
         {Object.entries(COMPARISON_LABELS).map(([key, text]) => <button className="oc-btn" key={key} aria-pressed={filter === key} onClick={() => setFilter(key)}>{text} {data.summary[key]}</button>)}
       </div>
-      <p className="muted">설치 위치별 비교 항목 수입니다. 같은 취약점이 여러 위치에 있으면 각각 집계합니다. 식별자 충돌은 검토 묶음으로 표시합니다.</p>
-      <p>저장된 취약점 수: 이전 {data.finding_counts.base.stored ?? '확인 불가'} / 현재 {data.finding_counts.target.stored ?? '확인 불가'}</p>
-      <div className="oc-tablewrap"><table><thead><tr><th>패키지</th><th>이전 / 현재 버전</th><th>상태</th><th>취약점 및 근거</th></tr></thead>
-        <tbody>{rows.map(row => <tr key={row.id}><td>{row.name}<br /><small>{row.basePath}<br />{row.targetPath}</small></td>
-          <td>{row.baseVersion}<br />{row.targetVersion}</td><td>{COMPARISON_LABELS[row.status]}{row.conflict && <div>식별자 검토 묶음</div>}</td>
-          <td><div>이전: {row.baseFindings}</div><div>현재: {row.targetFindings}</div><details><summary>판정 근거</summary><p>{comparisonReason(row.reason)}</p></details></td></tr>)}</tbody></table></div>
+      <p className="muted">설치 위치별로 비교하므로 아래 항목 수는 검사별 취약점 수와 다를 수 있습니다.</p>
+      <p>검사별 취약점 수: 이전 {data.finding_counts.base.stored ?? '확인 불가'} / 현재 {data.finding_counts.target.stored ?? '확인 불가'}</p>
+      <div className="oc-comparison-list">
+        {rows.map(row => <article className="oc-comparison-item" key={row.id}>
+          <div className="oc-comparison-item-head"><h3>{row.name}</h3>
+            <span className={`oc-comparison-status ${row.status}`}>{COMPARISON_LABELS[row.status]}</span></div>
+          <p className="oc-version-change"><span>이전 <b>{row.baseVersion}</b></span><span>현재 <b>{row.targetVersion}</b></span></p>
+          {row.baseFindings === row.targetFindings ? <p className="oc-comparison-findings">{row.targetFindings}</p> :
+            <div className="oc-comparison-findings"><p><b>이전</b> {row.baseFindings}</p><p><b>현재</b> {row.targetFindings}</p></div>}
+          {row.conflict && <p className="oc-comparison-note">여러 취약점의 식별자가 겹쳐 개별 비교가 필요합니다.</p>}
+          <details><summary>상세 내용</summary><p>{comparisonReason(row.reason)}</p>
+            <dl><dt>이전 설치 위치</dt><dd>{row.basePath}</dd><dt>현재 설치 위치</dt><dd>{row.targetPath}</dd></dl>
+          </details>
+        </article>)}
+      </div>
       {!rows.length && <p>해당 비교 항목이 없습니다.</p>}
-      <details><summary>패키지 설치 변화 ({data.installations.length})</summary><ul>{data.installations.map(i => <li key={i.installation_id}>{i.name}: {i.base?.installed_version || '없음'} / {i.target?.installed_version || '없음'} ({({matched:'대응',added:'추가',removed:'제거',not_comparable:'비교 불가'})[i.state] || i.state})</li>)}</ul></details>
-      <details><summary>패키지에 연결되지 않은 취약점 (별도 항목)</summary>{['base','target'].map(side => <div key={side}><h3>{side === 'base' ? '이전 검사' : '현재 검사'}</h3>
+      <details><summary>패키지 구성 비교 ({data.installations.length})</summary><ul>{data.installations.map(i => <li key={i.installation_id}>{i.name}: {i.base?.installed_version || '없음'} / {i.target?.installed_version || '없음'} ({({matched:'대응',added:'추가',removed:'제거',not_comparable:'비교 불가'})[i.state] || i.state})</li>)}</ul></details>
+      <details><summary>설치 위치를 확인할 수 없는 취약점</summary>{['base','target'].map(side => <div key={side}><h3>{side === 'base' ? '이전 검사' : '현재 검사'}</h3>
         <p>{data.unlinked_findings[side].map(f => findingText(data, side, [f])).join(', ') || '없음'}</p></div>)}</details>
-      <details><summary>검사 환경과 제한 사항</summary><p>도구나 DB의 변경이 결과 차이의 원인임을 의미하지는 않습니다.</p>
+      <details><summary>검사 도구 및 상세 정보</summary><p>도구나 DB의 변경이 결과 차이의 원인임을 의미하지는 않습니다.</p>
         <pre>{JSON.stringify({ warnings: data.warnings, context_changes: data.context_changes, base_sources: data.base.sources, target_sources: data.target.sources }, null, 2)}</pre></details>
     </>}
   </section>

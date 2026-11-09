@@ -550,8 +550,7 @@ export default function App() {
                     `검사 ID ${scanId.slice(0, 8)}`].filter(Boolean).join(' · ')}
                 </p>
               </div>
-              {scan && <div><StatusPill status={scan.status}>{`검사 ${label(scan.status)} · ${stagesDone(scan)}/${STAGES.length} 단계`}</StatusPill>
-                <button type="button" className="oc-btn" onClick={() => { const id = scan.project_id; newScan(); setUploadProjectId(id) }}>이 프로젝트 재검사</button></div>}
+              {scan && <StatusPill status={scan.status}>{`검사 ${label(scan.status)} · ${stagesDone(scan)}/${STAGES.length} 단계`}</StatusPill>}
             </div>
 
             <Progress scan={scan} />
@@ -567,7 +566,14 @@ export default function App() {
                   <AiReport scanId={scanId} scanStatus={scan && scan.status} findings={findings} onFinding={openDetail} onPackage={openPackage} />
                   {listPanel}
                 </div>
-                <SeverityDonut vulns={vulns} findings={findings} scan={scan} />
+                <div className="oc-col">
+                  <SeverityDonut vulns={vulns} findings={findings} scan={scan} />
+                  {scan && <section className="oc-rescan-banner" aria-label="프로젝트 재검사">
+                    <h2>수정한 프로젝트를 다시 검사해 보세요</h2>
+                    <p>이전 결과를 보관하고, 새 검사와 비교할 수 있습니다.</p>
+                    <button type="button" className="oc-btn primary" onClick={() => { const id = scan.project_id; newScan(); setUploadProjectId(id) }}>이 프로젝트 재검사</button>
+                  </section>}
+                </div>
               </div>
             ) : tab === 'compare' ? (scan && <ScanComparison key={scanId} scan={scan} onOpen={start} />) : listPanel}
           </>
