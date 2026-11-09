@@ -92,7 +92,6 @@ export default function ScanComparison({ scan, onOpen }) {
     {data && <>
       <h2>검사 비교 결과</h2>
       <p>이전 {date(data.base.created_at)} / 현재 {date(data.target.created_at)}</p>
-      {!data.comparison_complete && <p role="status" className="oc-alert">비교하지 못한 항목이 있습니다. 해당 항목의 상세 내용을 확인하세요.</p>}
       {data.warnings.includes('base_after_target') && <p role="status">비교 대상으로 선택한 결과가 현재 검사보다 나중에 실행됐습니다. 선택한 방향으로 비교합니다.</p>}
       <div className="oc-compare-actions" aria-label="비교 항목 필터">
         <button className="oc-btn" aria-pressed={filter === 'all'} onClick={() => setFilter('all')}>전체 {data.items.length}</button>
