@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "detail": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "enum": [
+            "scan_not_found",
+            "same_scan",
+            "different_project",
+            "scan_processing",
+            "comparison_limit_exceeded",
+            "database_unavailable",
+            "comparison_invariant_failed"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scan_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "uniqueItems": true
+        },
+        "limit": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "dimension": {
+                  "enum": [
+                    "installations",
+                    "finding_links",
+                    "unlinked_findings",
+                    "candidate_pairs"
+                  ]
+                },
+                "maximum": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "actual": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "dimension",
+                "maximum",
+                "actual"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "code",
+        "message",
+        "scan_ids",
+        "limit"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "detail"
+  ],
+  "additionalProperties": false
+}

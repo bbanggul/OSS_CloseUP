@@ -13,6 +13,7 @@ import AiReport from './AiReport'
 import FindingDetail from './FindingDetail'
 import PackageDetail from './PackageDetail'
 import Upload from './Upload'
+import ScanComparison from './ScanComparison'
 import { SummaryCards, SeverityDonut } from './Overview'
 import Icon from './Icons'
 import PackageApiList from './PackageApiList'
@@ -25,6 +26,9 @@ const STATUS_DOT = { completed: 'var(--oc-sea)', running: 'var(--oc-cyan)', queu
 
 const label = (status) => STATUS_LABEL[status] || status || '대기'
 
+// GitHub 저장소가 없는 패키지는 실패가 아니라 해당 없음
+const NO_GITHUB = { unmapped: '저장소 정보 없음', unsupported: 'GitHub 외 저장소' }
+
 function StatusPill({ status, children }) {
   return <span className="oc-pill"><span className="oc-dot" style={{ background: STATUS_DOT[status] || 'var(--oc-unknown)' }} />{children || label(status)}</span>
 }
@@ -35,6 +39,7 @@ const TABS = [
   ['licenses', '라이선스', 'doc'],
   ['maintenance', '유지보수', 'gear'],
   ['packages', '전체 패키지', 'box'],
+  ['compare', '이전 검사 비교', 'doc'],
 ]
 
 // null은 false가 아니다. 확인되지 않은 값을 '아니오'로 표시하지 않는다.
@@ -221,8 +226,10 @@ function Maintenance({ data, q }) {
                 <td>{formatDate(item.latest_commit_at)}</td>
                 <td>{triState(item.archived, 'archived', '아니오')}</td>
                 <td>{triState(item.deprecated, 'deprecated', '아니오')}</td>
-                <td><StatusPill status={item.github_status === 'success' ? 'completed' : item.github_status}>GitHub {item.github_status}</StatusPill>
-                  {item.github_error && <span className="err"> {item.github_error}</span>}</td>
+                <td>{NO_GITHUB[item.github_status]
+                  ? <span className="muted">{NO_GITHUB[item.github_status]}</span>
+                  : <><StatusPill status={item.github_status === 'success' ? 'completed' : item.github_status}>GitHub {item.github_status}</StatusPill>
+                    {item.github_error && <span className="err"> {item.github_error}</span>}</>}</td>
               </tr>
             ))}
           </tbody>
@@ -266,6 +273,7 @@ function Packages({ data, q }) {
 }
 
 export default function App() {
+  const [uploadProjectId, setUploadProjectId] = useState(null)
   const [scanId, setScanId] = useState(() => parseRoute(window.location.hash).scanId || '')
   const [detailId, setDetailId] = useState(() => parseRoute(window.location.hash).findingId)
   const [pkgRoute, setPkgRoute] = useState(() => parseRoute(window.location.hash).pkg || null)
@@ -390,6 +398,7 @@ export default function App() {
   }
 
   function start(id) {
+    setUploadProjectId(null)
     window.history.pushState(null, '', routeHash(id) || window.location.pathname)
     setDetailId(null)
     setPkgRoute(null)
@@ -400,6 +409,7 @@ export default function App() {
   }
 
   function newScan() {
+    setUploadProjectId(null)
     if (!scanId) return
     window.history.pushState(null, '', window.location.pathname)
     reset()
@@ -489,7 +499,7 @@ export default function App() {
           </div>
         )}
 
-        {view === 'upload' && <Upload onCreated={start} />}
+        {view === 'upload' && <Upload onCreated={start} projectId={uploadProjectId} />}
 
         {view === 'detail' && (
           detailIndex >= 0 ? (
@@ -561,9 +571,16 @@ export default function App() {
                   <AiReport scanId={scanId} scanStatus={scan && scan.status} findings={findings} onFinding={openDetail} onPackage={openPackage} />
                   {listPanel}
                 </div>
-                <SeverityDonut vulns={vulns} findings={findings} scan={scan} />
+                <div className="oc-col">
+                  <SeverityDonut vulns={vulns} findings={findings} scan={scan} />
+                  {scan && <section className="oc-rescan-banner" aria-label="프로젝트 재검사">
+                    <h2>프로젝트 재검사</h2>
+                    <p>검사 이력 보관 · 이전 결과 비교</p>
+                    <button type="button" className="oc-btn primary" onClick={() => { const id = scan.project_id; newScan(); setUploadProjectId(id) }}>재검사 시작</button>
+                  </section>}
+                </div>
               </div>
-            ) : listPanel}
+            ) : tab === 'compare' ? (scan && <ScanComparison key={scanId} scan={scan} onOpen={start} />) : listPanel}
           </>
         )}
       </main>

@@ -17,6 +17,7 @@ CREATE TABLE projects (
 );
 
 CREATE TABLE scan_runs (
+    display_name VARCHAR(80),
     scan_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     project_id UUID NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
     status TEXT NOT NULL CHECK (status IN ('queued', 'running', 'completed', 'partial', 'failed')),

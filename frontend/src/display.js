@@ -144,7 +144,7 @@ export function findingLabel(item) {
 }
 
 // ── 주소(#) 기반 화면 위치: 새로고침·뒤로 가기·주소 공유용 ──
-const ROUTE = /^#\/scan\/([0-9a-fA-F-]{36})(?:\/finding\/([0-9a-fA-F-]{36})|\/package\/([^/]+)|\/(findings|licenses|maintenance|packages))?$/
+const ROUTE = /^#\/scan\/([0-9a-fA-F-]{36})(?:\/finding\/([0-9a-fA-F-]{36})|\/package\/([^/]+)|\/(findings|licenses|maintenance|packages|compare))?$/
 
 // 패키지 주소는 '이름@버전'을 인코딩해 쓴다(@scope/name도 한 칸에 들어가도록).
 export function packageFromKey(key) {
@@ -167,7 +167,7 @@ export function routeHash(scanId, findingId, section = 'first', pkg = null) {
   if (!scanId) return ''
   if (pkg?.groupId) return `#/scan/${scanId}/package-group/${encodeURIComponent(pkg.groupId)}`
   if (pkg) return `#/scan/${scanId}/package/${encodeURIComponent(`${pkg.name}@${pkg.version}`)}`
-  return findingId ? `#/scan/${scanId}/finding/${findingId}` : `#/scan/${scanId}${section !== 'first' && ['findings', 'licenses', 'maintenance', 'packages'].includes(section) ? `/${section}` : ''}`
+  return findingId ? `#/scan/${scanId}/finding/${findingId}` : `#/scan/${scanId}${section !== 'first' && ['findings', 'licenses', 'maintenance', 'packages', 'compare'].includes(section) ? `/${section}` : ''}`
 }
 
 // ── 대시보드 요약(Figma 시안 기준) ─────────────────────────

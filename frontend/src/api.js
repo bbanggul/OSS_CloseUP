@@ -29,10 +29,11 @@ function describe(body, status) {
   return `요청이 실패했습니다 (HTTP ${status})`
 }
 
-export function createScan(packageJson, packageLock) {
+export function createScan(packageJson, packageLock, projectId) {
   const form = new FormData()
   form.append('package_json', packageJson, 'package.json')
   form.append('package_lock', packageLock, 'package-lock.json')
+  if (projectId) form.append('project_id', projectId)
   return request('/scans', { method: 'POST', body: form })
 }
 
@@ -127,3 +128,13 @@ export async function getPackageResults(scanId) {
 export const getPackageDetail = (scanId, groupId, snapshot) => request(
   `/scans/${scanId}/vulnerable-packages/${encodeURIComponent(groupId)}` +
   (snapshot ? `?snapshot_id=${encodeURIComponent(snapshot)}` : ''))
+
+export const getProjectScans = (projectId, offset = 0, signal) => request(
+  `/projects/${encodeURIComponent(projectId)}/scans?limit=50&offset=${offset}`, { signal })
+export const compareScans = (target, base, signal) => request(
+  `/scans/${encodeURIComponent(target)}/compare?base=${encodeURIComponent(base)}`, { signal })
+
+export const renameScan = (scanId, displayName) => request(`/scans/${encodeURIComponent(scanId)}`, {
+  method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ display_name: displayName }),
+})

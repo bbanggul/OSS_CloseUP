@@ -1,0 +1,1 @@
+ALTER TABLE scan_runs ADD COLUMN IF NOT EXISTS display_name VARCHAR(80);
