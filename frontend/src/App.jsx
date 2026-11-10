@@ -10,6 +10,7 @@ import {
   findingLabel, parseRoute, routeHash,
 } from './display'
 import AiReport from './AiReport'
+import { pollOutcome } from './poll'
 import FindingDetail from './FindingDetail'
 import PackageDetail from './PackageDetail'
 import Upload from './Upload'
@@ -299,6 +300,7 @@ export default function App() {
     let scheduledTimer
     const currentGeneration = ++generation.current
     const stale = () => generation.current !== currentGeneration
+    let conflictRetries = 0
 
     async function tick() {
       setPackageQueryFailed(false)
@@ -312,15 +314,17 @@ export default function App() {
         if (stale()) return
         const setters = [setPackages, setFindings, setMaintenance, setSbom, setPackageResults]
         const names = ['패키지', '취약점', '유지보수', 'SBOM', '패키지 묶음']
+        const outcome = pollOutcome(results, ACTIVE.has(current.status), conflictRetries)
+        conflictRetries = outcome.conflictRetries
         const errors = []
         results.forEach((result, index) => {
-          setters[index](result.status === 'fulfilled' ? result.value : null)
-          if (result.status === 'rejected') errors.push(`${names[index]}: ${result.reason.message}`)
+          if (!outcome.updates[index].keep) setters[index](outcome.updates[index].value)
+          if (outcome.failed[index]) errors.push(`${names[index]}: ${result.reason.message}`)
         })
-        setPackageQueryFailed(results[4].status === 'rejected')
+        setPackageQueryFailed(outcome.failed[4])
         setError(errors.length ? errors.join(' / ') : null)
-        if (ACTIVE.has(current.status)) {
-          scheduledTimer = setTimeout(tick, 3000)
+        if (outcome.delay) {
+          scheduledTimer = setTimeout(tick, outcome.delay)
           timer.current = scheduledTimer
         }
       } catch (err) {

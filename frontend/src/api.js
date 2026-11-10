@@ -25,6 +25,7 @@ async function request(path, options) {
 function describe(body, status) {
   const detail = body && body.detail
   if (typeof detail === 'string') return detail
+  if (detail && detail.code === 'snapshot_changed') return '검사 결과가 갱신됐습니다. 다시 불러와 주세요.'
   if (detail && typeof detail === 'object') return detail.message || JSON.stringify(detail)
   return `요청이 실패했습니다 (HTTP ${status})`
 }
