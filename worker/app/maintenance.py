@@ -109,6 +109,16 @@ class Client:
         return {'status':None,'error':'redirect_limit','fetched_at':now()}
 
 
+# npm 정보에 GitHub 저장소가 없거나(unmapped) GitHub 밖 저장소(unsupported)인 패키지는
+# 조회 실패가 아니라 '해당 없음'이다. 실제 조회 실패(failed 등)만 부분 완료로 남긴다.
+NOT_APPLICABLE=('unmapped','unsupported')
+
+
+def collection_status(counts,total):
+    github_done=counts['github_success']+sum(counts['github_'+r] for r in NOT_APPLICABLE)
+    return 'completed' if counts['npm_success']==total and github_done==total else 'partial'
+
+
 def date_value(value):
     if not isinstance(value,str): return None
     try:
@@ -258,8 +268,9 @@ def collect(conn,scan_id,allow_running=False,tick=lambda:None):
                     (info['repository_url'],info['repository_full_name'],scan_id,p['package_id']))
             counts['npm_'+info['npm_status']]+=1;counts['github_'+info['github_status']]+=1
             LOG.info('maintenance scan=%s progress=%s/%s npm=%s github=%s',scan_id,i,len(packages),info['npm_status'],info['github_status'])
-        summary={'status':'completed' if counts['npm_success']==len(packages) and counts['github_success']==len(packages) else 'partial',
-            'packages':len(packages),'authenticated':bool(client.token),**dict(counts)}
+        summary={'status':collection_status(counts,len(packages)),
+            'packages':len(packages),'authenticated':bool(client.token),
+            'github_not_applicable':sum(counts['github_'+r] for r in NOT_APPLICABLE),**dict(counts)}
         conn.execute('UPDATE scan_runs SET tool_status=tool_status || %s WHERE scan_id=%s',(Jsonb({'github':summary}),scan_id))
         return summary
     finally:

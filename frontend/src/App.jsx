@@ -26,6 +26,9 @@ const STATUS_DOT = { completed: 'var(--oc-sea)', running: 'var(--oc-cyan)', queu
 
 const label = (status) => STATUS_LABEL[status] || status || '대기'
 
+// GitHub 저장소가 없는 패키지는 실패가 아니라 해당 없음
+const NO_GITHUB = { unmapped: '저장소 정보 없음', unsupported: 'GitHub 외 저장소' }
+
 function StatusPill({ status, children }) {
   return <span className="oc-pill"><span className="oc-dot" style={{ background: STATUS_DOT[status] || 'var(--oc-unknown)' }} />{children || label(status)}</span>
 }
@@ -223,8 +226,10 @@ function Maintenance({ data, q }) {
                 <td>{formatDate(item.latest_commit_at)}</td>
                 <td>{triState(item.archived, 'archived', '아니오')}</td>
                 <td>{triState(item.deprecated, 'deprecated', '아니오')}</td>
-                <td><StatusPill status={item.github_status === 'success' ? 'completed' : item.github_status}>GitHub {item.github_status}</StatusPill>
-                  {item.github_error && <span className="err"> {item.github_error}</span>}</td>
+                <td>{NO_GITHUB[item.github_status]
+                  ? <span className="muted">{NO_GITHUB[item.github_status]}</span>
+                  : <><StatusPill status={item.github_status === 'success' ? 'completed' : item.github_status}>GitHub {item.github_status}</StatusPill>
+                    {item.github_error && <span className="err"> {item.github_error}</span>}</>}</td>
               </tr>
             ))}
           </tbody>

@@ -141,3 +141,15 @@ def test_fetch_all_propagates_errors(monkeypatch):
     def boom(*a): raise ValueError('bad')
     monkeypatch.setattr(m,'inspect_package',boom)
     with pytest.raises(ValueError): m.fetch_all(object(),[('a','1')])
+
+
+def test_collection_status_counts_missing_repository_as_not_applicable():
+    from collections import Counter
+    ok=Counter(npm_success=3,github_success=2,github_unmapped=1)
+    assert m.collection_status(ok,3)=='completed'
+    other_host=Counter(npm_success=2,github_success=1,github_unsupported=1)
+    assert m.collection_status(other_host,2)=='completed'
+    real_failure=Counter(npm_success=3,github_success=2,github_failed=1)
+    assert m.collection_status(real_failure,3)=='partial'
+    npm_failure=Counter(npm_success=2,npm_failed=1,github_success=2,github_unmapped=0)
+    assert m.collection_status(npm_failure,3)=='partial'
