@@ -189,7 +189,7 @@ function Licenses({ data, q }) {
             {rows.map((item) => (
               <tr key={item.package_id}>
                 <td className="pkg">{item.name}@{item.installed_version || '—'}</td>
-                <td>{relationLabel(item.relationship)}</td>
+                <td style={{ whiteSpace: 'nowrap' }}>{relationLabel(item.relationship)}</td>
                 <td className="id">{(item.licenses || []).join(', ') || <span className="muted">정보 없음</span>}</td>
                 <td>{licenseState(item.licenses) === 'review'
                   ? <><span className="oc-tag warn" style={{ marginLeft: 0 }}>조건 확인</span> 배포 방식에 따라 지켜야 할 의무가 있을 수 있습니다.</>
@@ -217,7 +217,7 @@ function Maintenance({ data, q }) {
   const limit = rateLimitNotice(data.collection)
   return (
     <>
-      <p className="oc-summary">{items.length}개 패키지 · 활동이 낮다고 해서 취약한 것은 아닙니다</p>
+      <p className="oc-summary">{items.length}개 패키지</p>
       {limit && <p className="oc-hint" role="status">GitHub 조회 한도(시간당 5,000회)를 넘어 {limit.count}개 패키지의 저장소 정보는 확인하지 못했습니다.{limit.at ? ` ${limit.at} 이후` : ' 한도가 풀린 뒤'} 재검사하면 채워집니다.</p>}
       {rows.length === 0 ? <p className="oc-empty">선택한 조건에 해당하는 패키지가 없습니다.</p> : (
         <table className="oc-table">
@@ -227,7 +227,7 @@ function Maintenance({ data, q }) {
               <tr key={item.package_id}>
                 <td className="pkg">{item.name}</td>
                 <td className="id">{item.repository_full_name || <span className="muted">매핑 없음</span>}</td>
-                <td>{formatDate(item.latest_commit_at)}</td>
+                <td style={{ whiteSpace: 'nowrap' }}>{formatDate(item.latest_commit_at)}</td>
                 <td>{triState(item.archived, 'archived', '아니오')}</td>
                 <td>{triState(item.deprecated, 'deprecated', '아니오')}</td>
                 <td>{item.github_error === 'rate_limited' ? <span className="muted">조회 한도 초과로 미확인</span>
@@ -265,7 +265,7 @@ function Packages({ data, q }) {
               <tr key={item.package_id}>
                 <td className="pkg">{item.name}</td>
                 <td className="id">{item.installed_version || '—'}</td>
-                <td>{relationLabel(item.relationship)}</td>
+                <td style={{ whiteSpace: 'nowrap' }}>{relationLabel(item.relationship)}</td>
                 <td>{item.licenses && item.licenses.length ? item.licenses.join(', ') : <span className="muted">정보 없음</span>}
                   {licenseState(item.licenses) === 'review' && <span className="oc-tag warn">조건 확인</span>}</td>
                 <td className="path">{item.lockfile_path}</td>
