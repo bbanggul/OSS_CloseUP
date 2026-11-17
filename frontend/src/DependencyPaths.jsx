@@ -29,7 +29,6 @@ export default function DependencyPaths({ scanId, findingId }) {
             </li>)}
           </ol> : <p>저장된 의존 관계에서 프로젝트부터 이어지는 경로를 찾지 못했습니다.</p>}
         </div>)}
-        <p className="note">저장된 최단 경로 중 하나입니다. 다른 경로로도 포함될 수 있으며, 실제 코드 사용 여부를 확인한 결과는 아닙니다.</p>
       </>}
   </section>
 }

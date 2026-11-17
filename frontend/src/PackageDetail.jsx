@@ -88,7 +88,6 @@ export default function PackageDetail({ scanId, groupId, snapshot, onBack, onFin
           <strong>{p.lockfile_path || '설치 위치 미제공'}</strong> · {relationLabel(p.relationship)}
           <div className="oc-hint">라이선스: {p.licenses?.length ? p.licenses.join(' · ') : '정보 없음'}</div>
         </div>)}
-        <p className="oc-hint">설치 위치는 상위 의존 경로나 수정할 파일명을 뜻하지 않습니다.</p>
       </section>
       <section className="oc-panel" aria-label="이 패키지의 취약점"><h2 className="oc-ptitle">이 패키지의 취약점</h2>
         <PackageFindings findings={group.findings || []} version={group.installed_version} onFinding={onFinding} />
