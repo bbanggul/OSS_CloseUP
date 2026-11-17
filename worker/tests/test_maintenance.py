@@ -153,3 +153,36 @@ def test_collection_status_counts_missing_repository_as_not_applicable():
     assert m.collection_status(real_failure,3)=='partial'
     npm_failure=Counter(npm_success=2,npm_failed=1,github_success=2,github_unmapped=0)
     assert m.collection_status(npm_failure,3)=='partial'
+
+
+def test_rate_limit_is_labelled_and_blocks_rest():
+    m.CACHE.clear();c=m.Client('test-secret');c.opener=MagicMock()
+    c.opener.open.return_value=response(403,{'message':'API rate limit exceeded'},
+        {'X-RateLimit-Remaining':'0','X-RateLimit-Reset':'1794917698'})
+    first=c.get('https://api.github.com/repos/x/y')
+    assert first['error']=='rate_limited' and first['rate_limit_reset']=='1794917698'
+    assert c.get('https://api.github.com/repos/x/z')['error']=='rate_limited'
+    assert c.opener.open.call_count==1
+
+
+def test_permission_403_is_not_rate_limit():
+    m.CACHE.clear();c=m.Client('test-secret');c.opener=MagicMock()
+    c.opener.open.return_value=response(403,{'message':'Resource not accessible'},{'X-RateLimit-Remaining':'4000'})
+    assert c.get('https://api.github.com/repos/x/y')['error']=='http_403'
+
+
+def test_rate_limited_repository_is_skipped_not_failed():
+    r=m.inspect_package(Fake(repo={'status':403,'error':'rate_limited'}),'a','1')
+    assert r['github_status']=='skipped' and r['github_error']=='rate_limited'
+    c=Fake(commits={'status':403,'error':'rate_limited'},release={'status':403,'error':'rate_limited'})
+    r=m.inspect_package(c,'a','1')
+    assert r['github_status']=='skipped' and r['github_error']=='rate_limited' and r['archived'] is False
+    c=Fake(commits={'status':403,'error':'rate_limited'},release={'status':500,'error':'http_500'})
+    assert m.inspect_package(c,'a','1')['github_status']=='failed'
+
+
+def test_collection_status_rate_limited():
+    from collections import Counter
+    assert m.collection_status(Counter(npm_success=4,github_success=2,github_unmapped=1,github_rate_limited=1),4)=='rate_limited'
+    assert m.collection_status(Counter(npm_success=4,github_success=2,github_rate_limited=1,github_failed=1),4)=='partial'
+    assert m.collection_status(Counter(npm_success=3,npm_failed=1,github_success=3,github_rate_limited=1),4)=='partial'

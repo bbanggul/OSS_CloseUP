@@ -148,7 +148,9 @@ def finalize(conn, scan_id):
     row = conn.execute('SELECT tool_status FROM scan_runs WHERE scan_id=%s',(scan_id,)).fetchone()
     states = row['tool_status']
     names = ('trivy','osv','syft','package_storage','normalization','github')
-    complete = all(states.get(n,{}).get('status') == 'completed' for n in names)
+    # 유지보수 조회가 GitHub 한도에만 걸린 경우는 검사 미완료로 보지 않는다(유지보수 화면에 따로 표시)
+    ok = lambda n: states.get(n,{}).get('status') == 'completed' or (n == 'github' and states.get(n,{}).get('status') == 'rate_limited')
+    complete = all(ok(n) for n in names)
     if 'priority' in states:
         complete = complete and states['priority'].get('status') == 'completed'
     final = 'completed' if complete else ('partial' if any(states.get(n,{}).get('status')=='completed' for n in ('trivy','osv','syft')) else 'failed')

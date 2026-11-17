@@ -6,7 +6,7 @@ import {
 import {
   STAGES, ACTIVE, stageProgress, computeProgress, stagesDone, scanDuration,
   licenseState, vulnItems,
-  priorityStateText, relationLabel, licenseSummary, maintenanceSummary, packageSummary,
+  priorityStateText, relationLabel, licenseSummary, maintenanceSummary, rateLimitNotice, packageSummary,
   findingLabel, parseRoute, routeHash,
 } from './display'
 import AiReport from './AiReport'
@@ -22,8 +22,9 @@ import PackageApiList from './PackageApiList'
 const STATUS_LABEL = {
   pending: '대기', queued: '대기', running: '진행 중', completed: '완료',
   partial: '부분 완료', failed: '실패', timeout: '시간 초과', skipped: '건너뜀',
+  rate_limited: '조회 한도 초과',
 }
-const STATUS_DOT = { completed: 'var(--oc-sea)', running: 'var(--oc-cyan)', queued: 'var(--oc-unknown)', pending: 'var(--oc-unknown)', partial: 'var(--oc-high)', failed: 'var(--oc-crit)', timeout: 'var(--oc-crit)', skipped: 'var(--oc-unknown)' }
+const STATUS_DOT = { completed: 'var(--oc-sea)', running: 'var(--oc-cyan)', queued: 'var(--oc-unknown)', pending: 'var(--oc-unknown)', partial: 'var(--oc-high)', failed: 'var(--oc-crit)', timeout: 'var(--oc-crit)', skipped: 'var(--oc-unknown)', rate_limited: 'var(--oc-high)' }
 
 const label = (status) => STATUS_LABEL[status] || status || '대기'
 
@@ -213,9 +214,11 @@ function Maintenance({ data, q }) {
   // 확인 대상(archived·deprecated)을 위로, 나머지는 그 아래에 둔다
   const flagged = (i) => i.archived === true || i.deprecated === true
   const rows = [...items.filter(flagged), ...items.filter((i) => !flagged(i))].filter((i) => matches(q, i.name, i.repository_full_name))
+  const limit = rateLimitNotice(data.collection)
   return (
     <>
       <p className="oc-summary">{items.length}개 패키지 · 활동이 낮다고 해서 취약한 것은 아닙니다</p>
+      {limit && <p className="oc-hint" role="status">GitHub 조회 한도(시간당 5,000회)를 넘어 {limit.count}개 패키지의 저장소 정보는 확인하지 못했습니다.{limit.at ? ` ${limit.at} 이후` : ' 한도가 풀린 뒤'} 재검사하면 채워집니다.</p>}
       {rows.length === 0 ? <p className="oc-empty">선택한 조건에 해당하는 패키지가 없습니다.</p> : (
         <table className="oc-table">
           <thead><tr><th>패키지</th><th>저장소</th><th>최근 커밋</th><th>보관(archived)</th><th>사용 중단</th><th>조회 상태</th></tr></thead>
@@ -227,7 +230,8 @@ function Maintenance({ data, q }) {
                 <td>{formatDate(item.latest_commit_at)}</td>
                 <td>{triState(item.archived, 'archived', '아니오')}</td>
                 <td>{triState(item.deprecated, 'deprecated', '아니오')}</td>
-                <td>{NO_GITHUB[item.github_status]
+                <td>{item.github_error === 'rate_limited' ? <span className="muted">조회 한도 초과로 미확인</span>
+                  : NO_GITHUB[item.github_status]
                   ? <span className="muted">{NO_GITHUB[item.github_status]}</span>
                   : <><StatusPill status={item.github_status === 'success' ? 'completed' : item.github_status}>GitHub {item.github_status}</StatusPill>
                     {item.github_error && <span className="err"> {item.github_error}</span>}</>}</td>

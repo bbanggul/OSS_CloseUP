@@ -25,7 +25,7 @@ export function SummaryCards({ packages, vulns, findings, maintenance, scan, onN
   const counts = severityCounts(vulns)
   const pkgReady = packages && (pkg.status === 'completed' || pkg.total > 0)
   const vulnReady = findings && (((findings.normalization || {}).status === 'completed') || vulns.length > 0)
-  const mntReady = maintenance && (mnt.status === 'completed' || mnt.status === 'partial' || (maintenance.items || []).length > 0)
+  const mntReady = maintenance && (mnt.status === 'completed' || mnt.status === 'partial' || mnt.status === 'rate_limited' || (maintenance.items || []).length > 0)
   const failed = vulnScanFailed(scan)
   return (
     <section className="oc-panel oc-cards" aria-label="검사 요약">
@@ -47,7 +47,7 @@ export function SummaryCards({ packages, vulns, findings, maintenance, scan, onN
       </Card>
       <Card num={mntReady ? mnt.flagged : '—'} label="유지보수 확인" icon="gear" onClick={() => onNavigate?.('maintenance')}>
         {!mntReady ? '저장소 정보를 조회하는 중'
-          : <>보관(archived) {mnt.archived} · 사용 중단 {mnt.deprecated}{mnt.status === 'partial' || mnt.status === 'failed' ? ' · 일부 확인 불가' : ''}</>}
+          : <>보관(archived) {mnt.archived} · 사용 중단 {mnt.deprecated}{mnt.status === 'partial' || mnt.status === 'failed' || mnt.status === 'rate_limited' ? ' · 일부 확인 불가' : ''}</>}
       </Card>
     </section>
   )

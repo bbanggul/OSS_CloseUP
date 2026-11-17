@@ -14,7 +14,7 @@ export const STAGES = [
 
 export const VULN_STAGES = ['trivy', 'osv']
 export const ACTIVE = new Set(['queued', 'running'])
-const DONE = new Set(['completed', 'partial', 'failed', 'timeout', 'skipped'])
+const DONE = new Set(['completed', 'partial', 'failed', 'timeout', 'skipped', 'rate_limited'])
 const FAILED = new Set(['failed', 'timeout'])
 
 // 단계 안의 세부 진행(예: 유지보수 34/76). 필드가 없으면 null.
@@ -253,6 +253,17 @@ export function licenseSummary(packages) {
 }
 
 // 유지보수: 확인된 사실(archived, deprecated)만 센다. null은 '아니오'가 아니다.
+// GitHub 시간당 조회 한도에 걸려 확인하지 못한 패키지 수와 한도가 풀리는 시각(없으면 null)
+export function rateLimitNotice(collection) {
+  const count = (collection && collection.github_rate_limited) || 0
+  if (!count) return null
+  const reset = Number(collection.rate_limit_reset)
+  const at = Number.isFinite(reset) && reset > 0
+    ? new Date(reset * 1000).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Seoul' })
+    : null
+  return { count, at }
+}
+
 export function maintenanceSummary(maintenance) {
   const items = (maintenance && maintenance.items) || []
   const archived = items.filter((i) => i.archived === true).length

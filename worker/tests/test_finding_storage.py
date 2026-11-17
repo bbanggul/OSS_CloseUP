@@ -78,3 +78,11 @@ def test_malformed_success_is_partial_not_clean():
         {'trivy':{'SchemaVersion':2},'osv':{}}, {t:{'status':'completed'} for t in ('trivy','osv')},scan_id='test')
     assert x['status']=='partial'
     assert x['tool_status']['osv']['error']['kind']=='normalization_error'
+
+
+@pytest.mark.parametrize('github,expected',[('rate_limited','completed'),('partial','partial')])
+def test_github_rate_limit_alone_does_not_make_scan_partial(github,expected):
+    c=MagicMock();states={n:{'status':'completed'} for n in ('trivy','osv','syft','package_storage','normalization')}
+    states['github']={'status':github}
+    c.execute.return_value.fetchone.return_value={'tool_status':states}
+    assert finalize(c,uuid4())==expected
