@@ -118,8 +118,15 @@ class Client:
 
 
 # npm 정보에 GitHub 저장소가 없거나(unmapped) GitHub 밖 저장소(unsupported)인 패키지는
-# 조회 실패가 아니라 '해당 없음'이다. 실제 조회 실패(failed 등)만 부분 완료로 남긴다.
-NOT_APPLICABLE=('unmapped','unsupported')
+# 조회 실패가 아니라 '해당 없음'이다. npm에 적힌 GitHub 저장소가 404(삭제·비공개, 대체 저장소도 없음)인
+# 경우(not_found)도 조회는 끝난 것이다. 실제 조회 실패(서버 오류 등)만 부분 완료로 남긴다.
+NOT_APPLICABLE=('unmapped','unsupported','not_found')
+
+
+def count_key(info):
+    if info['github_error']=='rate_limited': return 'github_rate_limited'
+    if info['github_status']=='failed' and info['github_error']=='http_404': return 'github_not_found'
+    return 'github_'+info['github_status']
 
 
 def collection_status(counts,total):
@@ -280,7 +287,7 @@ def collect(conn,scan_id,allow_running=False,tick=lambda:None):
                 conn.execute('UPDATE packages SET repository_url=%s,repository_full_name=%s WHERE scan_id=%s AND package_id=%s',
                     (info['repository_url'],info['repository_full_name'],scan_id,p['package_id']))
             counts['npm_'+info['npm_status']]+=1
-            counts['github_rate_limited' if info['github_error']=='rate_limited' else 'github_'+info['github_status']]+=1
+            counts[count_key(info)]+=1
             LOG.info('maintenance scan=%s progress=%s/%s npm=%s github=%s',scan_id,i,len(packages),info['npm_status'],info['github_status'])
         summary={'status':collection_status(counts,len(packages)),
             'packages':len(packages),'authenticated':bool(client.token),

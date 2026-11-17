@@ -186,3 +186,14 @@ def test_collection_status_rate_limited():
     assert m.collection_status(Counter(npm_success=4,github_success=2,github_unmapped=1,github_rate_limited=1),4)=='rate_limited'
     assert m.collection_status(Counter(npm_success=4,github_success=2,github_rate_limited=1,github_failed=1),4)=='partial'
     assert m.collection_status(Counter(npm_success=3,npm_failed=1,github_success=3,github_rate_limited=1),4)=='partial'
+
+
+def test_repository_404_counts_as_checked_not_failure():
+    from collections import Counter
+    gone={'github_status':'failed','github_error':'http_404'}
+    assert m.count_key(gone)=='github_not_found'
+    assert m.count_key({'github_status':'failed','github_error':'http_500'})=='github_failed'
+    assert m.count_key({'github_status':'failed','github_error':'commits_http_404'})=='github_failed'
+    assert m.count_key({'github_status':'skipped','github_error':'rate_limited'})=='github_rate_limited'
+    assert m.collection_status(Counter(npm_success=4,github_success=2,github_not_found=1,github_unmapped=1),4)=='completed'
+    assert m.collection_status(Counter(npm_success=3,github_success=1,github_not_found=1,github_failed=1),3)=='partial'

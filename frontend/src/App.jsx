@@ -231,6 +231,7 @@ function Maintenance({ data, q }) {
                 <td>{triState(item.archived, 'archived', '아니오')}</td>
                 <td>{triState(item.deprecated, 'deprecated', '아니오')}</td>
                 <td>{item.github_error === 'rate_limited' ? <span className="muted">조회 한도 초과로 미확인</span>
+                  : item.github_status === 'failed' && item.github_error === 'http_404' ? <span className="muted">저장소를 찾을 수 없음 (삭제 또는 비공개)</span>
                   : NO_GITHUB[item.github_status]
                   ? <span className="muted">{NO_GITHUB[item.github_status]}</span>
                   : <><StatusPill status={item.github_status === 'success' ? 'completed' : item.github_status}>GitHub {item.github_status}</StatusPill>
