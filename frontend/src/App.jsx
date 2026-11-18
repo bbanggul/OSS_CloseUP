@@ -98,9 +98,6 @@ function Sidebar({ view, tab, counts, onTab, onNewScan, sbom, onSbom, sbomBusy }
       <button type="button" className="oc-nav" disabled={!(sbom && sbom.available) || sbomBusy} onClick={onSbom} title={sbomTitle}>
         <Icon name="download" /><span>{sbomBusy ? '내려받는 중…' : 'SBOM 내려받기'}</span>
       </button>
-      <button type="button" className="oc-nav" disabled title="확장 단계에서 추가됩니다">
-        <Icon name="chat" /><span>질문하기 · 준비 중</span>
-      </button>
       <div className="grow" />
       <p className="foot">검사 결과는 검사 엔진 값을 그대로 보여줍니다.</p>
       </div>
