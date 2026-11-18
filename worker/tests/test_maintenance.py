@@ -141,3 +141,59 @@ def test_fetch_all_propagates_errors(monkeypatch):
     def boom(*a): raise ValueError('bad')
     monkeypatch.setattr(m,'inspect_package',boom)
     with pytest.raises(ValueError): m.fetch_all(object(),[('a','1')])
+
+
+def test_collection_status_counts_missing_repository_as_not_applicable():
+    from collections import Counter
+    ok=Counter(npm_success=3,github_success=2,github_unmapped=1)
+    assert m.collection_status(ok,3)=='completed'
+    other_host=Counter(npm_success=2,github_success=1,github_unsupported=1)
+    assert m.collection_status(other_host,2)=='completed'
+    real_failure=Counter(npm_success=3,github_success=2,github_failed=1)
+    assert m.collection_status(real_failure,3)=='partial'
+    npm_failure=Counter(npm_success=2,npm_failed=1,github_success=2,github_unmapped=0)
+    assert m.collection_status(npm_failure,3)=='partial'
+
+
+def test_rate_limit_is_labelled_and_blocks_rest():
+    m.CACHE.clear();c=m.Client('test-secret');c.opener=MagicMock()
+    c.opener.open.return_value=response(403,{'message':'API rate limit exceeded'},
+        {'X-RateLimit-Remaining':'0','X-RateLimit-Reset':'1794917698'})
+    first=c.get('https://api.github.com/repos/x/y')
+    assert first['error']=='rate_limited' and first['rate_limit_reset']=='1794917698'
+    assert c.get('https://api.github.com/repos/x/z')['error']=='rate_limited'
+    assert c.opener.open.call_count==1
+
+
+def test_permission_403_is_not_rate_limit():
+    m.CACHE.clear();c=m.Client('test-secret');c.opener=MagicMock()
+    c.opener.open.return_value=response(403,{'message':'Resource not accessible'},{'X-RateLimit-Remaining':'4000'})
+    assert c.get('https://api.github.com/repos/x/y')['error']=='http_403'
+
+
+def test_rate_limited_repository_is_skipped_not_failed():
+    r=m.inspect_package(Fake(repo={'status':403,'error':'rate_limited'}),'a','1')
+    assert r['github_status']=='skipped' and r['github_error']=='rate_limited'
+    c=Fake(commits={'status':403,'error':'rate_limited'},release={'status':403,'error':'rate_limited'})
+    r=m.inspect_package(c,'a','1')
+    assert r['github_status']=='skipped' and r['github_error']=='rate_limited' and r['archived'] is False
+    c=Fake(commits={'status':403,'error':'rate_limited'},release={'status':500,'error':'http_500'})
+    assert m.inspect_package(c,'a','1')['github_status']=='failed'
+
+
+def test_collection_status_rate_limited():
+    from collections import Counter
+    assert m.collection_status(Counter(npm_success=4,github_success=2,github_unmapped=1,github_rate_limited=1),4)=='rate_limited'
+    assert m.collection_status(Counter(npm_success=4,github_success=2,github_rate_limited=1,github_failed=1),4)=='partial'
+    assert m.collection_status(Counter(npm_success=3,npm_failed=1,github_success=3,github_rate_limited=1),4)=='partial'
+
+
+def test_repository_404_counts_as_checked_not_failure():
+    from collections import Counter
+    gone={'github_status':'failed','github_error':'http_404'}
+    assert m.count_key(gone)=='github_not_found'
+    assert m.count_key({'github_status':'failed','github_error':'http_500'})=='github_failed'
+    assert m.count_key({'github_status':'failed','github_error':'commits_http_404'})=='github_failed'
+    assert m.count_key({'github_status':'skipped','github_error':'rate_limited'})=='github_rate_limited'
+    assert m.collection_status(Counter(npm_success=4,github_success=2,github_not_found=1,github_unmapped=1),4)=='completed'
+    assert m.collection_status(Counter(npm_success=3,github_success=1,github_not_found=1,github_failed=1),3)=='partial'

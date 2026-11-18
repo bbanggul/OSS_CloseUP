@@ -1,0 +1,274 @@
+{
+  "schema_version": "scan-compare-v1",
+  "policy_version": "compare-policy-v1",
+  "project": {
+    "project_id": "94974492-7a7d-5fcd-a5c6-a3b603a76ef1",
+    "name": "compare-contract-demo"
+  },
+  "count_basis": "installation_comparison_item",
+  "installations": [
+    {
+      "installation_id": "installation_6f099294d0576613ae27358a295f98e2ac26a80b427cee61391ff2480e22e891",
+      "ecosystem": "npm",
+      "name": "demo-lib",
+      "state": "matched",
+      "location_match": "exact",
+      "location_evidence": null,
+      "version_change": {
+        "kind": "same",
+        "direction": "none"
+      },
+      "flags": [],
+      "base": {
+        "package_id": "971ad568-4f2f-5394-a8de-46c3abd3a8ac",
+        "lockfile_path": "node_modules/demo-lib",
+        "installed_version": "1.0.0",
+        "relationship": "indirect"
+      },
+      "target": {
+        "package_id": "eb8ef5b7-86fa-56df-84ef-c0c04a73a82c",
+        "lockfile_path": "node_modules/demo-lib",
+        "installed_version": "1.0.0",
+        "relationship": "indirect"
+      }
+    }
+  ],
+  "items": [
+    {
+      "item_id": "item_c6b959ac154126ba31a78e9827f3924345848fa46b4a04e8efdfd8979cac64cd",
+      "installation_id": "installation_6f099294d0576613ae27358a295f98e2ac26a80b427cee61391ff2480e22e891",
+      "unit": "installation_finding",
+      "status": "not_comparable",
+      "reason": "target_incomplete",
+      "base_finding_ids": [
+        "45762b15-ff1a-5bf9-8bec-2865e9739dab"
+      ],
+      "target_finding_ids": [],
+      "match": {
+        "kind": "none",
+        "identifiers": [],
+        "candidate_edges": []
+      },
+      "flags": []
+    },
+    {
+      "item_id": "item_bdd202333107ff5847d2f7a0f0fbf879c615dd42c133fad9b1dfa5f8d73e7b50",
+      "installation_id": "installation_6f099294d0576613ae27358a295f98e2ac26a80b427cee61391ff2480e22e891",
+      "unit": "installation_finding",
+      "status": "persisting",
+      "reason": "matched_identity",
+      "base_finding_ids": [
+        "657f360c-a21d-5f2b-b8ce-5c554f5b3447"
+      ],
+      "target_finding_ids": [
+        "810b6a2b-5392-5d40-b133-d4aa85c8e261"
+      ],
+      "match": {
+        "kind": "exact_ghsa",
+        "identifiers": [
+          "GHSA-2222-3333-4444"
+        ],
+        "candidate_edges": [
+          {
+            "base_finding_id": "657f360c-a21d-5f2b-b8ce-5c554f5b3447",
+            "target_finding_id": "810b6a2b-5392-5d40-b133-d4aa85c8e261",
+            "basis": "exact_ghsa",
+            "identifiers": [
+              "GHSA-2222-3333-4444"
+            ]
+          }
+        ]
+      },
+      "flags": []
+    }
+  ],
+  "finding_catalog": {
+    "base": {
+      "657f360c-a21d-5f2b-b8ce-5c554f5b3447": {
+        "finding_id": "657f360c-a21d-5f2b-b8ce-5c554f5b3447",
+        "identifiers": [
+          "GHSA-2222-3333-4444"
+        ],
+        "primary_ids": [
+          "GHSA-2222-3333-4444"
+        ],
+        "severity": "HIGH",
+        "source_tools": [
+          "osv",
+          "trivy"
+        ],
+        "manual_review_required": false,
+        "review_reasons": [],
+        "merge_identifiers": [],
+        "reference_urls": []
+      },
+      "45762b15-ff1a-5bf9-8bec-2865e9739dab": {
+        "finding_id": "45762b15-ff1a-5bf9-8bec-2865e9739dab",
+        "identifiers": [
+          "GHSA-5555-6666-7777"
+        ],
+        "primary_ids": [
+          "GHSA-5555-6666-7777"
+        ],
+        "severity": "HIGH",
+        "source_tools": [
+          "osv",
+          "trivy"
+        ],
+        "manual_review_required": false,
+        "review_reasons": [],
+        "merge_identifiers": [],
+        "reference_urls": []
+      }
+    },
+    "target": {
+      "810b6a2b-5392-5d40-b133-d4aa85c8e261": {
+        "finding_id": "810b6a2b-5392-5d40-b133-d4aa85c8e261",
+        "identifiers": [
+          "GHSA-2222-3333-4444"
+        ],
+        "primary_ids": [
+          "GHSA-2222-3333-4444"
+        ],
+        "severity": "HIGH",
+        "source_tools": [
+          "trivy"
+        ],
+        "manual_review_required": false,
+        "review_reasons": [],
+        "merge_identifiers": [],
+        "reference_urls": []
+      }
+    }
+  },
+  "unlinked_findings": {
+    "base": [],
+    "target": []
+  },
+  "warnings": [
+    "target_absence_not_verified"
+  ],
+  "base": {
+    "scan_id": "02eb8141-1554-5ab9-843b-ae3a1872be01",
+    "project_id": "94974492-7a7d-5fcd-a5c6-a3b603a76ef1",
+    "status": "completed",
+    "result_state": "ready",
+    "created_at": "2026-10-30T03:00:00Z",
+    "finished_at": "2026-10-30T03:00:10Z",
+    "input_package_lock_sha256": "04bddad0300b0a1fbc2f129a024f1dad6cd138c69e212727ec8e6e2c4eba8390",
+    "normalization_fingerprint": "1d5010e1312e44b91209af700507d42da9570da4a767c58c6e0ce2cde08bc948",
+    "inventory_complete": true,
+    "findings_usable": true,
+    "security_complete": true,
+    "absence_eligible": true,
+    "absence_blockers": [],
+    "provenance_status": "verified",
+    "sources": {
+      "trivy": {
+        "status": "completed",
+        "tool_run_id": "c5a4d465-a11b-5a8d-bf1d-05dd7f1b5d1c",
+        "tool_version": "synthetic-tool-v1",
+        "database_version": "synthetic-db-1",
+        "queried_at": null
+      },
+      "osv": {
+        "status": "completed",
+        "tool_run_id": "495263e4-a7e4-54a2-9d3d-9766577d6140",
+        "tool_version": "synthetic-tool-v1",
+        "database_version": null,
+        "queried_at": "2026-10-30T03:00:08Z"
+      }
+    },
+    "snapshot_id": "compare_input_25a0aae4fabc8b9ac6ae6c256bfb36d4e0986f0568e89fddcec39a80bd5a1ae4"
+  },
+  "target": {
+    "scan_id": "2a71e3f8-84e3-5008-895b-8cc74d4fd997",
+    "project_id": "94974492-7a7d-5fcd-a5c6-a3b603a76ef1",
+    "status": "partial",
+    "result_state": "partial",
+    "created_at": "2026-10-31T03:00:00Z",
+    "finished_at": "2026-10-31T03:00:10Z",
+    "input_package_lock_sha256": "6409944040df992b787c31db29dd6cc8e655ba238dfb988423362b457e0c20f8",
+    "normalization_fingerprint": "650f223116e79ad70e24dad74c5242a34c040c4d72d7a64424a8294abdfdd101",
+    "inventory_complete": true,
+    "findings_usable": true,
+    "security_complete": false,
+    "absence_eligible": false,
+    "absence_blockers": [
+      "security_incomplete"
+    ],
+    "provenance_status": "verified",
+    "sources": {
+      "trivy": {
+        "status": "completed",
+        "tool_run_id": "2509a4bd-793c-52e3-b2a6-c26a2bd7738f",
+        "tool_version": "synthetic-tool-v1",
+        "database_version": "synthetic-db-1",
+        "queried_at": null
+      },
+      "osv": {
+        "status": "failed",
+        "tool_run_id": "72cae5bd-edf1-53cf-b963-be9460898593",
+        "tool_version": "synthetic-tool-v1",
+        "database_version": null,
+        "queried_at": null
+      }
+    },
+    "snapshot_id": "compare_input_e1361ef23f1e4c083473809529009cafdbd14737e706eeca4156392d38deb31f"
+  },
+  "comparison_id": "compare_419dff9cf7686e53d50127482f27e1b818bea8b9a7af90abdbbb6a75b31d106a",
+  "summary": {
+    "new": 0,
+    "not_detected": 0,
+    "persisting": 1,
+    "not_comparable": 1,
+    "not_comparable_units": {
+      "installation_finding": 1,
+      "identifier_conflict": 0
+    }
+  },
+  "finding_counts": {
+    "count_basis": "stored_finding",
+    "base": {
+      "stored": 2,
+      "linked": 2,
+      "unlinked": 0
+    },
+    "target": {
+      "stored": 1,
+      "linked": 1,
+      "unlinked": 0
+    }
+  },
+  "comparison_complete": false,
+  "context_changes": [
+    {
+      "tool": "trivy",
+      "field": "tool_version",
+      "base": "synthetic-tool-v1",
+      "target": "synthetic-tool-v1",
+      "state": "same"
+    },
+    {
+      "tool": "trivy",
+      "field": "database_version",
+      "base": "synthetic-db-1",
+      "target": "synthetic-db-1",
+      "state": "same"
+    },
+    {
+      "tool": "osv",
+      "field": "tool_version",
+      "base": "synthetic-tool-v1",
+      "target": "synthetic-tool-v1",
+      "state": "same"
+    },
+    {
+      "tool": "osv",
+      "field": "database_version",
+      "base": null,
+      "target": null,
+      "state": "unknown"
+    }
+  ]
+}

@@ -6,13 +6,15 @@ import {
 import {
   STAGES, ACTIVE, stageProgress, computeProgress, stagesDone, scanDuration,
   licenseState, vulnItems,
-  priorityStateText, relationLabel, licenseSummary, maintenanceSummary, packageSummary,
+  priorityStateText, relationLabel, licenseSummary, maintenanceSummary, rateLimitNotice, packageSummary,
   findingLabel, parseRoute, routeHash,
 } from './display'
 import AiReport from './AiReport'
+import { pollOutcome } from './poll'
 import FindingDetail from './FindingDetail'
 import PackageDetail from './PackageDetail'
 import Upload from './Upload'
+import ScanComparison from './ScanComparison'
 import { SummaryCards, SeverityDonut } from './Overview'
 import Icon from './Icons'
 import PackageApiList from './PackageApiList'
@@ -20,10 +22,14 @@ import PackageApiList from './PackageApiList'
 const STATUS_LABEL = {
   pending: '대기', queued: '대기', running: '진행 중', completed: '완료',
   partial: '부분 완료', failed: '실패', timeout: '시간 초과', skipped: '건너뜀',
+  rate_limited: '조회 한도 초과',
 }
-const STATUS_DOT = { completed: 'var(--oc-sea)', running: 'var(--oc-cyan)', queued: 'var(--oc-unknown)', pending: 'var(--oc-unknown)', partial: 'var(--oc-high)', failed: 'var(--oc-crit)', timeout: 'var(--oc-crit)', skipped: 'var(--oc-unknown)' }
+const STATUS_DOT = { completed: 'var(--oc-sea)', running: 'var(--oc-cyan)', queued: 'var(--oc-unknown)', pending: 'var(--oc-unknown)', partial: 'var(--oc-high)', failed: 'var(--oc-crit)', timeout: 'var(--oc-crit)', skipped: 'var(--oc-unknown)', rate_limited: 'var(--oc-high)' }
 
 const label = (status) => STATUS_LABEL[status] || status || '대기'
+
+// GitHub 저장소가 없는 패키지는 실패가 아니라 해당 없음
+const NO_GITHUB = { unmapped: '저장소 정보 없음', unsupported: 'GitHub 외 저장소' }
 
 function StatusPill({ status, children }) {
   return <span className="oc-pill"><span className="oc-dot" style={{ background: STATUS_DOT[status] || 'var(--oc-unknown)' }} />{children || label(status)}</span>
@@ -35,6 +41,7 @@ const TABS = [
   ['licenses', '라이선스', 'doc'],
   ['maintenance', '유지보수', 'gear'],
   ['packages', '전체 패키지', 'box'],
+  ['compare', '이전 검사 비교', 'doc'],
 ]
 
 // null은 false가 아니다. 확인되지 않은 값을 '아니오'로 표시하지 않는다.
@@ -90,9 +97,6 @@ function Sidebar({ view, tab, counts, onTab, onNewScan, sbom, onSbom, sbomBusy }
       <div className="label">ETC</div>
       <button type="button" className="oc-nav" disabled={!(sbom && sbom.available) || sbomBusy} onClick={onSbom} title={sbomTitle}>
         <Icon name="download" /><span>{sbomBusy ? '내려받는 중…' : 'SBOM 내려받기'}</span>
-      </button>
-      <button type="button" className="oc-nav" disabled title="확장 단계에서 추가됩니다">
-        <Icon name="chat" /><span>질문하기 · 준비 중</span>
       </button>
       <div className="grow" />
       <p className="foot">검사 결과는 검사 엔진 값을 그대로 보여줍니다.</p>
@@ -182,7 +186,7 @@ function Licenses({ data, q }) {
             {rows.map((item) => (
               <tr key={item.package_id}>
                 <td className="pkg">{item.name}@{item.installed_version || '—'}</td>
-                <td>{relationLabel(item.relationship)}</td>
+                <td style={{ whiteSpace: 'nowrap' }}>{relationLabel(item.relationship)}</td>
                 <td className="id">{(item.licenses || []).join(', ') || <span className="muted">정보 없음</span>}</td>
                 <td>{licenseState(item.licenses) === 'review'
                   ? <><span className="oc-tag warn" style={{ marginLeft: 0 }}>조건 확인</span> 배포 방식에 따라 지켜야 할 의무가 있을 수 있습니다.</>
@@ -207,9 +211,11 @@ function Maintenance({ data, q }) {
   // 확인 대상(archived·deprecated)을 위로, 나머지는 그 아래에 둔다
   const flagged = (i) => i.archived === true || i.deprecated === true
   const rows = [...items.filter(flagged), ...items.filter((i) => !flagged(i))].filter((i) => matches(q, i.name, i.repository_full_name))
+  const limit = rateLimitNotice(data.collection)
   return (
     <>
-      <p className="oc-summary">{items.length}개 패키지 · 활동이 낮다고 해서 취약한 것은 아닙니다</p>
+      <p className="oc-summary">{items.length}개 패키지</p>
+      {limit && <p className="oc-hint" role="status">GitHub 조회 한도(시간당 5,000회)를 넘어 {limit.count}개 패키지의 저장소 정보는 확인하지 못했습니다.{limit.at ? ` ${limit.at} 이후` : ' 한도가 풀린 뒤'} 재검사하면 채워집니다.</p>}
       {rows.length === 0 ? <p className="oc-empty">선택한 조건에 해당하는 패키지가 없습니다.</p> : (
         <table className="oc-table">
           <thead><tr><th>패키지</th><th>저장소</th><th>최근 커밋</th><th>보관(archived)</th><th>사용 중단</th><th>조회 상태</th></tr></thead>
@@ -218,11 +224,15 @@ function Maintenance({ data, q }) {
               <tr key={item.package_id}>
                 <td className="pkg">{item.name}</td>
                 <td className="id">{item.repository_full_name || <span className="muted">매핑 없음</span>}</td>
-                <td>{formatDate(item.latest_commit_at)}</td>
+                <td style={{ whiteSpace: 'nowrap' }}>{formatDate(item.latest_commit_at)}</td>
                 <td>{triState(item.archived, 'archived', '아니오')}</td>
                 <td>{triState(item.deprecated, 'deprecated', '아니오')}</td>
-                <td><StatusPill status={item.github_status === 'success' ? 'completed' : item.github_status}>GitHub {item.github_status}</StatusPill>
-                  {item.github_error && <span className="err"> {item.github_error}</span>}</td>
+                <td>{item.github_error === 'rate_limited' ? <span className="muted">조회 한도 초과로 미확인</span>
+                  : item.github_status === 'failed' && item.github_error === 'http_404' ? <span className="muted">저장소를 찾을 수 없음 (삭제 또는 비공개)</span>
+                  : NO_GITHUB[item.github_status]
+                  ? <span className="muted">{NO_GITHUB[item.github_status]}</span>
+                  : <><StatusPill status={item.github_status === 'success' ? 'completed' : item.github_status}>GitHub {item.github_status}</StatusPill>
+                    {item.github_error && <span className="err"> {item.github_error}</span>}</>}</td>
               </tr>
             ))}
           </tbody>
@@ -252,7 +262,7 @@ function Packages({ data, q }) {
               <tr key={item.package_id}>
                 <td className="pkg">{item.name}</td>
                 <td className="id">{item.installed_version || '—'}</td>
-                <td>{relationLabel(item.relationship)}</td>
+                <td style={{ whiteSpace: 'nowrap' }}>{relationLabel(item.relationship)}</td>
                 <td>{item.licenses && item.licenses.length ? item.licenses.join(', ') : <span className="muted">정보 없음</span>}
                   {licenseState(item.licenses) === 'review' && <span className="oc-tag warn">조건 확인</span>}</td>
                 <td className="path">{item.lockfile_path}</td>
@@ -266,6 +276,7 @@ function Packages({ data, q }) {
 }
 
 export default function App() {
+  const [uploadProjectId, setUploadProjectId] = useState(null)
   const [scanId, setScanId] = useState(() => parseRoute(window.location.hash).scanId || '')
   const [detailId, setDetailId] = useState(() => parseRoute(window.location.hash).findingId)
   const [pkgRoute, setPkgRoute] = useState(() => parseRoute(window.location.hash).pkg || null)
@@ -291,6 +302,7 @@ export default function App() {
     let scheduledTimer
     const currentGeneration = ++generation.current
     const stale = () => generation.current !== currentGeneration
+    let conflictRetries = 0
 
     async function tick() {
       setPackageQueryFailed(false)
@@ -304,15 +316,17 @@ export default function App() {
         if (stale()) return
         const setters = [setPackages, setFindings, setMaintenance, setSbom, setPackageResults]
         const names = ['패키지', '취약점', '유지보수', 'SBOM', '패키지 묶음']
+        const outcome = pollOutcome(results, ACTIVE.has(current.status), conflictRetries)
+        conflictRetries = outcome.conflictRetries
         const errors = []
         results.forEach((result, index) => {
-          setters[index](result.status === 'fulfilled' ? result.value : null)
-          if (result.status === 'rejected') errors.push(`${names[index]}: ${result.reason.message}`)
+          if (!outcome.updates[index].keep) setters[index](outcome.updates[index].value)
+          if (outcome.failed[index]) errors.push(`${names[index]}: ${result.reason.message}`)
         })
-        setPackageQueryFailed(results[4].status === 'rejected')
+        setPackageQueryFailed(outcome.failed[4])
         setError(errors.length ? errors.join(' / ') : null)
-        if (ACTIVE.has(current.status)) {
-          scheduledTimer = setTimeout(tick, 3000)
+        if (outcome.delay) {
+          scheduledTimer = setTimeout(tick, outcome.delay)
           timer.current = scheduledTimer
         }
       } catch (err) {
@@ -390,6 +404,7 @@ export default function App() {
   }
 
   function start(id) {
+    setUploadProjectId(null)
     window.history.pushState(null, '', routeHash(id) || window.location.pathname)
     setDetailId(null)
     setPkgRoute(null)
@@ -400,6 +415,7 @@ export default function App() {
   }
 
   function newScan() {
+    setUploadProjectId(null)
     if (!scanId) return
     window.history.pushState(null, '', window.location.pathname)
     reset()
@@ -489,7 +505,7 @@ export default function App() {
           </div>
         )}
 
-        {view === 'upload' && <Upload onCreated={start} />}
+        {view === 'upload' && <Upload onCreated={start} projectId={uploadProjectId} />}
 
         {view === 'detail' && (
           detailIndex >= 0 ? (
@@ -561,9 +577,16 @@ export default function App() {
                   <AiReport scanId={scanId} scanStatus={scan && scan.status} findings={findings} onFinding={openDetail} onPackage={openPackage} />
                   {listPanel}
                 </div>
-                <SeverityDonut vulns={vulns} findings={findings} scan={scan} />
+                <div className="oc-col">
+                  <SeverityDonut vulns={vulns} findings={findings} scan={scan} />
+                  {scan && <section className="oc-rescan-banner" aria-label="프로젝트 재검사">
+                    <h2>프로젝트 재검사</h2>
+                    <p>검사 이력 보관 · 이전 결과 비교</p>
+                    <button type="button" className="oc-btn primary" onClick={() => { const id = scan.project_id; newScan(); setUploadProjectId(id) }}>재검사 시작</button>
+                  </section>}
+                </div>
               </div>
-            ) : listPanel}
+            ) : tab === 'compare' ? (scan && <ScanComparison key={scanId} scan={scan} onOpen={start} />) : listPanel}
           </>
         )}
       </main>

@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { buildFixPrompt } from '../src/fixPrompt.js'
+import { buildFixPrompt, buildBulkFixPrompt, selectFixPackages } from '../src/fixPrompt.js'
 
 const sample = () => ({ scan_id: 'scan', snapshot_id: 'snapshot', result_state: 'ready', deduplication_status: 'review_pending',
   priority_evaluation: { status: 'completed', current_result_available: true }, unlinked_finding_count: 1,
@@ -51,4 +51,27 @@ test('untrusted names and paths are serialized as data, not interpolated instruc
   const text = buildFixPrompt(data)
   assert.ok(!text.split('검사 데이터(JSON):')[0].includes('RUN_COMMAND'))
   assert.equal(facts(text).package.name, data.item.name)
+})
+
+test('bulk prompt keeps complete evidence and rejects mixed snapshots and duplicates', () => {
+  const a = sample(), b = sample(); b.item.package_group_id = 'other'
+  const result = facts(buildBulkFixPrompt([a, b]))
+  assert.equal(result.length, 2)
+  assert.equal(result[0].findings.length, 2)
+  assert.doesNotMatch(buildBulkFixPrompt([a]), /DO_NOT_COPY|Ignore all instructions/)
+  assert.throws(() => buildBulkFixPrompt([a, a]))
+  b.snapshot_id = 'changed'
+  assert.throws(() => buildBulkFixPrompt([a, b]))
+  assert.throws(() => buildBulkFixPrompt([]))
+})
+test('bulk selection uses included severities and displayed global rank', () => {
+  const items = [
+    {global_rank:1, severity_counts:{CRITICAL:1,HIGH:2}},
+    {global_rank:2, severity_counts:{HIGH:1}},
+    {global_rank:null, severity_counts:{HIGH:1}},
+    {global_rank:3, severity_counts:{LOW:1}},
+  ]
+  assert.deepEqual(selectFixPackages(items, 'HIGH'), items.slice(0,3))
+  assert.deepEqual(selectFixPackages(items, null, '2'), items.slice(0,2))
+  for (const bad of ['', '0', '-1', '1.5', 'abc']) assert.deepEqual(selectFixPackages(items, null, bad), [])
 })

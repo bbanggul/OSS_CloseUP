@@ -1,0 +1,8 @@
+{
+  "detail": {
+    "code": "same_scan",
+    "message": "서로 다른 검사를 선택하세요.",
+    "scan_ids": [],
+    "limit": null
+  }
+}

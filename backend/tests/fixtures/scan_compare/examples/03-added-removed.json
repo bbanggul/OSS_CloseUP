@@ -1,0 +1,275 @@
+{
+  "schema_version": "scan-compare-v1",
+  "policy_version": "compare-policy-v1",
+  "project": {
+    "project_id": "94974492-7a7d-5fcd-a5c6-a3b603a76ef1",
+    "name": "compare-contract-demo"
+  },
+  "count_basis": "installation_comparison_item",
+  "installations": [
+    {
+      "installation_id": "installation_da4964a90e98dc1ed9c417de42d37002146460ba602bd2ee7d57807dbd1f1422",
+      "ecosystem": "npm",
+      "name": "demo-clean",
+      "state": "added",
+      "location_match": "target_only",
+      "location_evidence": null,
+      "version_change": {
+        "kind": "not_applicable",
+        "direction": "not_applicable"
+      },
+      "flags": [],
+      "base": null,
+      "target": {
+        "package_id": "ee42fa41-4f4e-5f5d-a27d-3cc9e3645165",
+        "lockfile_path": "node_modules/demo-clean",
+        "installed_version": "1.0.0",
+        "relationship": "indirect"
+      }
+    },
+    {
+      "installation_id": "installation_55e9d63987d301c41551e0c360230e530f27502306ba2c96178674d14d1abaec",
+      "ecosystem": "npm",
+      "name": "demo-lib",
+      "state": "removed",
+      "location_match": "base_only",
+      "location_evidence": null,
+      "version_change": {
+        "kind": "not_applicable",
+        "direction": "not_applicable"
+      },
+      "flags": [],
+      "base": {
+        "package_id": "3bf51e10-75b3-5cc8-9b4b-c4a8550e163a",
+        "lockfile_path": "node_modules/demo-lib",
+        "installed_version": "1.0.0",
+        "relationship": "indirect"
+      },
+      "target": null
+    },
+    {
+      "installation_id": "installation_57a88e80a75f67b7d398d67441824cd9b8dbf79cd8a09299834f4ab85ecc7a1a",
+      "ecosystem": "npm",
+      "name": "demo-new",
+      "state": "added",
+      "location_match": "target_only",
+      "location_evidence": null,
+      "version_change": {
+        "kind": "not_applicable",
+        "direction": "not_applicable"
+      },
+      "flags": [],
+      "base": null,
+      "target": {
+        "package_id": "7e9df05a-3003-5d2c-b565-ba970e3bb1dc",
+        "lockfile_path": "node_modules/demo-new",
+        "installed_version": "1.0.0",
+        "relationship": "indirect"
+      }
+    }
+  ],
+  "items": [
+    {
+      "item_id": "item_4930c84aa0004ab979c04f93946f169543deb68ae8706c4b4dc033fcf7fd6291",
+      "installation_id": "installation_55e9d63987d301c41551e0c360230e530f27502306ba2c96178674d14d1abaec",
+      "unit": "installation_finding",
+      "status": "not_detected",
+      "reason": "package_removed",
+      "base_finding_ids": [
+        "273c02a0-dd92-5132-a001-553e68a0424d"
+      ],
+      "target_finding_ids": [],
+      "match": {
+        "kind": "none",
+        "identifiers": [],
+        "candidate_edges": []
+      },
+      "flags": []
+    },
+    {
+      "item_id": "item_8e0393e6a88c83b1a5bacf54df51facd286728f67f3146bb8b00f9d2ca4346ae",
+      "installation_id": "installation_57a88e80a75f67b7d398d67441824cd9b8dbf79cd8a09299834f4ab85ecc7a1a",
+      "unit": "installation_finding",
+      "status": "new",
+      "reason": "package_added",
+      "base_finding_ids": [],
+      "target_finding_ids": [
+        "43c9cde9-6ba1-58b7-ae17-d9e23cd8f1f4"
+      ],
+      "match": {
+        "kind": "none",
+        "identifiers": [],
+        "candidate_edges": []
+      },
+      "flags": []
+    }
+  ],
+  "finding_catalog": {
+    "base": {
+      "273c02a0-dd92-5132-a001-553e68a0424d": {
+        "finding_id": "273c02a0-dd92-5132-a001-553e68a0424d",
+        "identifiers": [
+          "GHSA-2222-3333-4444"
+        ],
+        "primary_ids": [
+          "GHSA-2222-3333-4444"
+        ],
+        "severity": "HIGH",
+        "source_tools": [
+          "osv",
+          "trivy"
+        ],
+        "manual_review_required": false,
+        "review_reasons": [],
+        "merge_identifiers": [],
+        "reference_urls": []
+      }
+    },
+    "target": {
+      "43c9cde9-6ba1-58b7-ae17-d9e23cd8f1f4": {
+        "finding_id": "43c9cde9-6ba1-58b7-ae17-d9e23cd8f1f4",
+        "identifiers": [
+          "GHSA-5555-6666-7777"
+        ],
+        "primary_ids": [
+          "GHSA-5555-6666-7777"
+        ],
+        "severity": "HIGH",
+        "source_tools": [
+          "osv",
+          "trivy"
+        ],
+        "manual_review_required": false,
+        "review_reasons": [],
+        "merge_identifiers": [],
+        "reference_urls": []
+      }
+    }
+  },
+  "unlinked_findings": {
+    "base": [],
+    "target": []
+  },
+  "warnings": [],
+  "base": {
+    "scan_id": "eb647d47-f579-5f77-9cda-bc2423e9566a",
+    "project_id": "94974492-7a7d-5fcd-a5c6-a3b603a76ef1",
+    "status": "completed",
+    "result_state": "ready",
+    "created_at": "2026-10-30T03:00:00Z",
+    "finished_at": "2026-10-30T03:00:10Z",
+    "input_package_lock_sha256": "93c294969da492d8c7241ae862377048afaaff5120d2e7b8e3e0fa52f74fd768",
+    "normalization_fingerprint": "3c236d7172c60d3a24761fa808e6a4765fef3b8e886814e479cf138513eac4da",
+    "inventory_complete": true,
+    "findings_usable": true,
+    "security_complete": true,
+    "absence_eligible": true,
+    "absence_blockers": [],
+    "provenance_status": "verified",
+    "sources": {
+      "trivy": {
+        "status": "completed",
+        "tool_run_id": "86602ed0-e2d2-5d2d-9f15-a427f731324e",
+        "tool_version": "synthetic-tool-v1",
+        "database_version": "synthetic-db-1",
+        "queried_at": null
+      },
+      "osv": {
+        "status": "completed",
+        "tool_run_id": "2051da08-bed7-5383-a0b2-57cf2e43785b",
+        "tool_version": "synthetic-tool-v1",
+        "database_version": null,
+        "queried_at": "2026-10-30T03:00:08Z"
+      }
+    },
+    "snapshot_id": "compare_input_a2f3fc5d8f0f0b6681620607bfcafbbc726c7018c11c75c1893095b51f41d31a"
+  },
+  "target": {
+    "scan_id": "b7c47815-f7ea-598b-b135-b9765c8f702f",
+    "project_id": "94974492-7a7d-5fcd-a5c6-a3b603a76ef1",
+    "status": "completed",
+    "result_state": "ready",
+    "created_at": "2026-10-31T03:00:00Z",
+    "finished_at": "2026-10-31T03:00:10Z",
+    "input_package_lock_sha256": "18fa420e91a40a6b25e2145a1f0d833deccc4751c0450283aa3e07596ada8048",
+    "normalization_fingerprint": "98ea801a738de0c02326ce0666dc55c5a1b6a68c8898f7692fdb475a18251fdc",
+    "inventory_complete": true,
+    "findings_usable": true,
+    "security_complete": true,
+    "absence_eligible": true,
+    "absence_blockers": [],
+    "provenance_status": "verified",
+    "sources": {
+      "trivy": {
+        "status": "completed",
+        "tool_run_id": "20075436-3aa2-5783-85d7-dd8c93db3071",
+        "tool_version": "synthetic-tool-v1",
+        "database_version": "synthetic-db-1",
+        "queried_at": null
+      },
+      "osv": {
+        "status": "completed",
+        "tool_run_id": "e1d34871-2a7a-5ac8-aa8d-9464f3c6b3b0",
+        "tool_version": "synthetic-tool-v1",
+        "database_version": null,
+        "queried_at": "2026-10-31T03:00:08Z"
+      }
+    },
+    "snapshot_id": "compare_input_82cc433980f877a35835bf126333d47ca733031df525b24a9b307a16c1f1e143"
+  },
+  "comparison_id": "compare_1ec1e2bf3341a111238f584c8b3e693f5f0eadf1f0de2a38bbf8091bb470f98c",
+  "summary": {
+    "new": 1,
+    "not_detected": 1,
+    "persisting": 0,
+    "not_comparable": 0,
+    "not_comparable_units": {
+      "installation_finding": 0,
+      "identifier_conflict": 0
+    }
+  },
+  "finding_counts": {
+    "count_basis": "stored_finding",
+    "base": {
+      "stored": 1,
+      "linked": 1,
+      "unlinked": 0
+    },
+    "target": {
+      "stored": 1,
+      "linked": 1,
+      "unlinked": 0
+    }
+  },
+  "comparison_complete": true,
+  "context_changes": [
+    {
+      "tool": "trivy",
+      "field": "tool_version",
+      "base": "synthetic-tool-v1",
+      "target": "synthetic-tool-v1",
+      "state": "same"
+    },
+    {
+      "tool": "trivy",
+      "field": "database_version",
+      "base": "synthetic-db-1",
+      "target": "synthetic-db-1",
+      "state": "same"
+    },
+    {
+      "tool": "osv",
+      "field": "tool_version",
+      "base": "synthetic-tool-v1",
+      "target": "synthetic-tool-v1",
+      "state": "same"
+    },
+    {
+      "tool": "osv",
+      "field": "database_version",
+      "base": null,
+      "target": null,
+      "state": "unknown"
+    }
+  ]
+}

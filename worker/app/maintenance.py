@@ -50,6 +50,13 @@ class NoRedirect(HTTPRedirectHandler):
     def redirect_request(self,*args,**kwargs): return None
 
 
+def rate_limited(status,headers,body):
+    """GitHub 시간당 한도(remaining 0)나 단기 과다 요청(Retry-After, 429)인지. 권한 오류(401 등)와 구분한다."""
+    message=str(body.get('message','')).lower() if isinstance(body,dict) else ''
+    return (status==429 or headers.get('X-RateLimit-Remaining')=='0'
+            or bool(headers.get('Retry-After')) or 'rate limit' in message)
+
+
 class Client:
     def __init__(self,token=None,tick=lambda:None):
         self.token=token
@@ -97,6 +104,7 @@ class Client:
                 if status in (401,403,429):
                     result['retry_after']=response.headers.get('Retry-After')
                     result['rate_limit_reset']=response.headers.get('X-RateLimit-Reset')
+                    if rate_limited(status,response.headers,body): result['error']='rate_limited'
                     self.blocked[host]=result
                 if status==200:
                     if len(CACHE)>=2048: CACHE.clear()
@@ -107,6 +115,26 @@ class Client:
             finally:
                 if response is not None: response.close()
         return {'status':None,'error':'redirect_limit','fetched_at':now()}
+
+
+# npm 정보에 GitHub 저장소가 없거나(unmapped) GitHub 밖 저장소(unsupported)인 패키지는
+# 조회 실패가 아니라 '해당 없음'이다. npm에 적힌 GitHub 저장소가 404(삭제·비공개, 대체 저장소도 없음)인
+# 경우(not_found)도 조회는 끝난 것이다. 실제 조회 실패(서버 오류 등)만 부분 완료로 남긴다.
+NOT_APPLICABLE=('unmapped','unsupported','not_found')
+
+
+def count_key(info):
+    if info['github_error']=='rate_limited': return 'github_rate_limited'
+    if info['github_status']=='failed' and info['github_error']=='http_404': return 'github_not_found'
+    return 'github_'+info['github_status']
+
+
+def collection_status(counts,total):
+    github_done=counts['github_success']+sum(counts['github_'+r] for r in NOT_APPLICABLE)
+    if counts['npm_success']!=total: return 'partial'
+    if github_done==total: return 'completed'
+    # 남은 것이 전부 GitHub 한도 초과로 못 본 패키지면 검사 실패가 아니라 '한도 초과'로 구분한다
+    return 'rate_limited' if github_done+counts['github_rate_limited']==total else 'partial'
 
 
 def date_value(value):
@@ -176,7 +204,7 @@ def inspect_package(client,name,version):
     out['github_checked_at']=date_value(r.get('fetched_at'))
     repo=r.get('body')
     if r.get('status')!=200 or not isinstance(repo,dict) or type(repo.get('archived')) is not bool:
-        out['github_status']='skipped' if r.get('error')=='token_missing' else 'failed'
+        out['github_status']='skipped' if r.get('error') in ('token_missing','rate_limited') else 'failed'
         out['github_error']=r.get('error') or 'invalid_repository_response';return out
     out['archived']=repo['archived'];out['default_branch']=repo.get('default_branch')
     canonical,_,_=repository(repo.get('html_url'))
@@ -204,6 +232,8 @@ def inspect_package(client,name,version):
         if not out['latest_release_tag'] or not out['latest_release_published_at']: errors.append('invalid_release')
     elif release.get('status')==404: raw['release_note']='no_visible_latest_release'
     else: errors.append('release_'+str(release.get('error') or 'invalid_response'))
+    if errors and all(e.endswith('rate_limited') for e in errors):
+        out['github_status']='skipped';out['github_error']='rate_limited';return out
     out['github_status']='failed' if errors else 'success';out['github_error']=';'.join(errors) or None
     return out
 
@@ -256,10 +286,13 @@ def collect(conn,scan_id,allow_running=False,tick=lambda:None):
                     ','.join(f'{k}=EXCLUDED.{k}' for k in columns),(scan_id,p['package_id'],*vals))
                 conn.execute('UPDATE packages SET repository_url=%s,repository_full_name=%s WHERE scan_id=%s AND package_id=%s',
                     (info['repository_url'],info['repository_full_name'],scan_id,p['package_id']))
-            counts['npm_'+info['npm_status']]+=1;counts['github_'+info['github_status']]+=1
+            counts['npm_'+info['npm_status']]+=1
+            counts[count_key(info)]+=1
             LOG.info('maintenance scan=%s progress=%s/%s npm=%s github=%s',scan_id,i,len(packages),info['npm_status'],info['github_status'])
-        summary={'status':'completed' if counts['npm_success']==len(packages) and counts['github_success']==len(packages) else 'partial',
-            'packages':len(packages),'authenticated':bool(client.token),**dict(counts)}
+        summary={'status':collection_status(counts,len(packages)),
+            'packages':len(packages),'authenticated':bool(client.token),
+            'github_not_applicable':sum(counts['github_'+r] for r in NOT_APPLICABLE),
+            'rate_limit_reset':(client.blocked.get('api.github.com') or {}).get('rate_limit_reset'),**dict(counts)}
         conn.execute('UPDATE scan_runs SET tool_status=tool_status || %s WHERE scan_id=%s',(Jsonb({'github':summary}),scan_id))
         return summary
     finally:

@@ -14,7 +14,7 @@ export const STAGES = [
 
 export const VULN_STAGES = ['trivy', 'osv']
 export const ACTIVE = new Set(['queued', 'running'])
-const DONE = new Set(['completed', 'partial', 'failed', 'timeout', 'skipped'])
+const DONE = new Set(['completed', 'partial', 'failed', 'timeout', 'skipped', 'rate_limited'])
 const FAILED = new Set(['failed', 'timeout'])
 
 // 단계 안의 세부 진행(예: 유지보수 34/76). 필드가 없으면 null.
@@ -144,7 +144,7 @@ export function findingLabel(item) {
 }
 
 // ── 주소(#) 기반 화면 위치: 새로고침·뒤로 가기·주소 공유용 ──
-const ROUTE = /^#\/scan\/([0-9a-fA-F-]{36})(?:\/finding\/([0-9a-fA-F-]{36})|\/package\/([^/]+)|\/(findings|licenses|maintenance|packages))?$/
+const ROUTE = /^#\/scan\/([0-9a-fA-F-]{36})(?:\/finding\/([0-9a-fA-F-]{36})|\/package\/([^/]+)|\/(findings|licenses|maintenance|packages|compare))?$/
 
 // 패키지 주소는 '이름@버전'을 인코딩해 쓴다(@scope/name도 한 칸에 들어가도록).
 export function packageFromKey(key) {
@@ -167,7 +167,7 @@ export function routeHash(scanId, findingId, section = 'first', pkg = null) {
   if (!scanId) return ''
   if (pkg?.groupId) return `#/scan/${scanId}/package-group/${encodeURIComponent(pkg.groupId)}`
   if (pkg) return `#/scan/${scanId}/package/${encodeURIComponent(`${pkg.name}@${pkg.version}`)}`
-  return findingId ? `#/scan/${scanId}/finding/${findingId}` : `#/scan/${scanId}${section !== 'first' && ['findings', 'licenses', 'maintenance', 'packages'].includes(section) ? `/${section}` : ''}`
+  return findingId ? `#/scan/${scanId}/finding/${findingId}` : `#/scan/${scanId}${section !== 'first' && ['findings', 'licenses', 'maintenance', 'packages', 'compare'].includes(section) ? `/${section}` : ''}`
 }
 
 // ── 대시보드 요약(Figma 시안 기준) ─────────────────────────
@@ -253,6 +253,17 @@ export function licenseSummary(packages) {
 }
 
 // 유지보수: 확인된 사실(archived, deprecated)만 센다. null은 '아니오'가 아니다.
+// GitHub 시간당 조회 한도에 걸려 확인하지 못한 패키지 수와 한도가 풀리는 시각(없으면 null)
+export function rateLimitNotice(collection) {
+  const count = (collection && collection.github_rate_limited) || 0
+  if (!count) return null
+  const reset = Number(collection.rate_limit_reset)
+  const at = Number.isFinite(reset) && reset > 0
+    ? new Date(reset * 1000).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Seoul' })
+    : null
+  return { count, at }
+}
+
 export function maintenanceSummary(maintenance) {
   const items = (maintenance && maintenance.items) || []
   const archived = items.filter((i) => i.archived === true).length

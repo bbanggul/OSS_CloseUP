@@ -50,3 +50,5 @@ from .dependency_view import router as dependency_router
 app.include_router(dependency_router)
 from .package_api import router as package_router
 app.include_router(package_router)
+from .scan_compare_api import router as scan_compare_router
+app.include_router(scan_compare_router)

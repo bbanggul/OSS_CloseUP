@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import BulkFixPrompt from './BulkFixPrompt'
 import { getPackageDetail } from './api'
 import { findingLabel, SEVERITIES } from './display'
 import { SeverityBadge } from './PackageFindingList'
@@ -40,6 +41,7 @@ export default function PackageApiList({ data, failed, scanId, q = '', firstOnly
     (!query || [g.name, g.installed_version, ...(g.finding_ids || []).map(id => findingLabels[id])].some(v => String(v || '').toLowerCase().includes(query))))
   const unlinked = data.unlinked.filter(f => !query || findingLabel(f).toLowerCase().includes(query))
   return <>
+    {!firstOnly && <BulkFixPrompt key={`${scanId}:${data.snapshot_id}`} data={data} scanId={scanId} />}
     {data.result_state === 'partial' && <p className="err">부분 검사 결과입니다. 확보된 자료 기준의 순위이며 전체 결과가 아닐 수 있습니다.</p>}
     {!data.priority_evaluation?.current_result_available && <p className="oc-hint">현재 우선순위를 사용할 수 없어 숫자 순위 없이 표시합니다.</p>}
     {!firstOnly && <div className="oc-priority-controls"><label>조치 우선순위 <select value={priority} onChange={e => setPriority(e.target.value)}>

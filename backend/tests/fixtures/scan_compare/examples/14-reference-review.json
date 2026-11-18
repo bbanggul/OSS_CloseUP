@@ -1,0 +1,239 @@
+{
+  "schema_version": "scan-compare-v1",
+  "policy_version": "compare-policy-v1",
+  "project": {
+    "project_id": "94974492-7a7d-5fcd-a5c6-a3b603a76ef1",
+    "name": "compare-contract-demo"
+  },
+  "count_basis": "installation_comparison_item",
+  "installations": [
+    {
+      "installation_id": "installation_80d0e80ab0979f5754848315b16e8db112bf5e84ba1be34f1658e74ae3fc050f",
+      "ecosystem": "npm",
+      "name": "lodash",
+      "state": "matched",
+      "location_match": "exact",
+      "location_evidence": null,
+      "version_change": {
+        "kind": "same",
+        "direction": "none"
+      },
+      "flags": [],
+      "base": {
+        "package_id": "9e9a396f-9359-59ed-8ab6-0e8626ea90b5",
+        "lockfile_path": "node_modules/lodash",
+        "installed_version": "1.0.0",
+        "relationship": "indirect"
+      },
+      "target": {
+        "package_id": "9921755b-a6bc-5d65-86c4-f283b051ea65",
+        "lockfile_path": "node_modules/lodash",
+        "installed_version": "1.0.0",
+        "relationship": "indirect"
+      }
+    }
+  ],
+  "items": [
+    {
+      "item_id": "item_afad9eb7944ae22dcd6e6babd8f78f0d4856fc15e38eccba2b4032e84e09a09e",
+      "installation_id": "installation_80d0e80ab0979f5754848315b16e8db112bf5e84ba1be34f1658e74ae3fc050f",
+      "unit": "identifier_conflict",
+      "status": "not_comparable",
+      "reason": "identifier_review_required",
+      "base_finding_ids": [
+        "9cf45031-9f20-5699-ad14-e2beab4e47e6"
+      ],
+      "target_finding_ids": [
+        "efd79488-cef3-5824-b7b2-7167e91caf41"
+      ],
+      "match": {
+        "kind": "ambiguous",
+        "identifiers": [],
+        "candidate_edges": [
+          {
+            "base_finding_id": "9cf45031-9f20-5699-ad14-e2beab4e47e6",
+            "target_finding_id": "efd79488-cef3-5824-b7b2-7167e91caf41",
+            "basis": "reference_review_only",
+            "identifiers": []
+          }
+        ]
+      },
+      "flags": []
+    }
+  ],
+  "finding_catalog": {
+    "base": {
+      "9cf45031-9f20-5699-ad14-e2beab4e47e6": {
+        "finding_id": "9cf45031-9f20-5699-ad14-e2beab4e47e6",
+        "identifiers": [
+          "NSWG-ECO-516"
+        ],
+        "primary_ids": [
+          "NSWG-ECO-516"
+        ],
+        "severity": "HIGH",
+        "source_tools": [
+          "trivy"
+        ],
+        "manual_review_required": true,
+        "review_reasons": [
+          "NSWG-ECO-516_requires_manual_review"
+        ],
+        "merge_identifiers": [],
+        "reference_urls": [
+          "https://example.invalid/synthetic-advisory"
+        ]
+      }
+    },
+    "target": {
+      "efd79488-cef3-5824-b7b2-7167e91caf41": {
+        "finding_id": "efd79488-cef3-5824-b7b2-7167e91caf41",
+        "identifiers": [
+          "GHSA-2222-3333-4444"
+        ],
+        "primary_ids": [
+          "GHSA-2222-3333-4444"
+        ],
+        "severity": "HIGH",
+        "source_tools": [
+          "osv",
+          "trivy"
+        ],
+        "manual_review_required": false,
+        "review_reasons": [],
+        "merge_identifiers": [],
+        "reference_urls": [
+          "https://example.invalid/synthetic-advisory"
+        ]
+      }
+    }
+  },
+  "unlinked_findings": {
+    "base": [],
+    "target": []
+  },
+  "warnings": [
+    "manual_deduplication_review_pending"
+  ],
+  "base": {
+    "scan_id": "a8928b3e-8a7d-5cb2-9e4a-7bc5be9d625d",
+    "project_id": "94974492-7a7d-5fcd-a5c6-a3b603a76ef1",
+    "status": "completed",
+    "result_state": "ready",
+    "created_at": "2026-10-30T03:00:00Z",
+    "finished_at": "2026-10-30T03:00:10Z",
+    "input_package_lock_sha256": "a8ae1387f2adba811cbfab31846630700259bd28fc1a31c4cb68e1447eca8fba",
+    "normalization_fingerprint": "9b61d4f70c049f4ee369da05b9f22931cd1c3940420e13471ca5a40ccf379dbe",
+    "inventory_complete": true,
+    "findings_usable": true,
+    "security_complete": true,
+    "absence_eligible": true,
+    "absence_blockers": [],
+    "provenance_status": "verified",
+    "sources": {
+      "trivy": {
+        "status": "completed",
+        "tool_run_id": "fb189991-84f0-56fc-946e-a8f3a3568bfc",
+        "tool_version": "synthetic-tool-v1",
+        "database_version": "synthetic-db-1",
+        "queried_at": null
+      },
+      "osv": {
+        "status": "completed",
+        "tool_run_id": "49a192fb-d1ec-5dab-a8a1-dd86b4575115",
+        "tool_version": "synthetic-tool-v1",
+        "database_version": null,
+        "queried_at": "2026-10-30T03:00:08Z"
+      }
+    },
+    "snapshot_id": "compare_input_346937a435113ee67ca7acd7e83894b4a7e94f905b33b2cc1a91dff3854af845"
+  },
+  "target": {
+    "scan_id": "088c89fa-4a35-5c53-aec1-2e110597e45f",
+    "project_id": "94974492-7a7d-5fcd-a5c6-a3b603a76ef1",
+    "status": "completed",
+    "result_state": "ready",
+    "created_at": "2026-10-31T03:00:00Z",
+    "finished_at": "2026-10-31T03:00:10Z",
+    "input_package_lock_sha256": "35daf5957a0585350717f8357e4e1ff1e318bd4ba8565bc7098684049919aa33",
+    "normalization_fingerprint": "43b4b3f194df027bd67ccb1d59cf78d642e0db4f4ac17d4a10493849cdaa241a",
+    "inventory_complete": true,
+    "findings_usable": true,
+    "security_complete": true,
+    "absence_eligible": true,
+    "absence_blockers": [],
+    "provenance_status": "verified",
+    "sources": {
+      "trivy": {
+        "status": "completed",
+        "tool_run_id": "f1babb68-07b9-58da-a9c7-e9f130cef80b",
+        "tool_version": "synthetic-tool-v1",
+        "database_version": "synthetic-db-1",
+        "queried_at": null
+      },
+      "osv": {
+        "status": "completed",
+        "tool_run_id": "729e3622-a3fa-5c19-8de8-d44a91d10434",
+        "tool_version": "synthetic-tool-v1",
+        "database_version": null,
+        "queried_at": "2026-10-31T03:00:08Z"
+      }
+    },
+    "snapshot_id": "compare_input_0795f0188fa1c2453720be522e3c13365f4eebac6de6de0fff21378d9f040226"
+  },
+  "comparison_id": "compare_758f260bd505024abbb0d908e37dd2cc407c03d89d2eb3d5068f641a0b20a5f7",
+  "summary": {
+    "new": 0,
+    "not_detected": 0,
+    "persisting": 0,
+    "not_comparable": 1,
+    "not_comparable_units": {
+      "installation_finding": 0,
+      "identifier_conflict": 1
+    }
+  },
+  "finding_counts": {
+    "count_basis": "stored_finding",
+    "base": {
+      "stored": 1,
+      "linked": 1,
+      "unlinked": 0
+    },
+    "target": {
+      "stored": 1,
+      "linked": 1,
+      "unlinked": 0
+    }
+  },
+  "comparison_complete": false,
+  "context_changes": [
+    {
+      "tool": "trivy",
+      "field": "tool_version",
+      "base": "synthetic-tool-v1",
+      "target": "synthetic-tool-v1",
+      "state": "same"
+    },
+    {
+      "tool": "trivy",
+      "field": "database_version",
+      "base": "synthetic-db-1",
+      "target": "synthetic-db-1",
+      "state": "same"
+    },
+    {
+      "tool": "osv",
+      "field": "tool_version",
+      "base": "synthetic-tool-v1",
+      "target": "synthetic-tool-v1",
+      "state": "same"
+    },
+    {
+      "tool": "osv",
+      "field": "database_version",
+      "base": null,
+      "target": null,
+      "state": "unknown"
+    }
+  ]
+}

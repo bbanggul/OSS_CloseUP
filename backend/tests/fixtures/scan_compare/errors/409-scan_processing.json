@@ -1,0 +1,10 @@
+{
+  "detail": {
+    "code": "scan_processing",
+    "message": "검사가 진행 중입니다. 완료 후 다시 비교하세요.",
+    "scan_ids": [
+      "59f36e0c-4cd8-5c49-99c2-94b50387adb7"
+    ],
+    "limit": null
+  }
+}

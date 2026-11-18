@@ -73,7 +73,7 @@ function Slot({ kind, state, onPick }) {
   )
 }
 
-export default function Upload({ onCreated }) {
+export default function Upload({ onCreated, projectId }) {
   const [files, setFiles] = useState({ pkg: null, lock: null })
   const [error, setError] = useState(null)
   const [sending, setSending] = useState(false)
@@ -92,7 +92,7 @@ export default function Upload({ onCreated }) {
     if (!ready || sending) return
     setError(null); setSending(true)
     try {
-      const result = await createScan(files.pkg.file, files.lock.file)
+      const result = await createScan(files.pkg.file, files.lock.file, projectId)
       onCreated(result.scan_id)
     } catch (err) {
       setError(err.message)
@@ -105,11 +105,12 @@ export default function Upload({ onCreated }) {
     <>
       <div className="oc-head">
         <div>
-          <h1>새 검사</h1>
+          <h1>{projectId ? '같은 프로젝트 재검사' : '새 검사'}</h1>
           <p>package.json과 package-lock.json을 올리면 취약점·라이선스·유지보수 상태를 검사합니다.</p>
         </div>
       </div>
 
+      {projectId && <p className="oc-hint">기존 프로젝트의 새 검사로 저장합니다. 수정한 파일 두 개를 올려 주세요.</p>}
       <section className="oc-panel oc-upload">
         <div className="oc-slots">
           <Slot kind="pkg" state={files.pkg} onPick={(f) => pick('pkg', f)} />

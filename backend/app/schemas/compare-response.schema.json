@@ -1,0 +1,1064 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OSS CloseUP scan compare v1 response",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "scan-compare-v1"
+    },
+    "policy_version": {
+      "const": "compare-policy-v1"
+    },
+    "comparison_id": {
+      "type": "string",
+      "pattern": "^compare_[0-9a-f]{64}$"
+    },
+    "project": {
+      "type": "object",
+      "properties": {
+        "project_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "project_id",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "base": {
+      "$ref": "#/$defs/Scan"
+    },
+    "target": {
+      "$ref": "#/$defs/Scan"
+    },
+    "comparison_complete": {
+      "type": "boolean"
+    },
+    "count_basis": {
+      "const": "installation_comparison_item"
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "new": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "not_detected": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "persisting": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "not_comparable": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "not_comparable_units": {
+          "type": "object",
+          "properties": {
+            "installation_finding": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "identifier_conflict": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "installation_finding",
+            "identifier_conflict"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "new",
+        "not_detected",
+        "persisting",
+        "not_comparable",
+        "not_comparable_units"
+      ],
+      "additionalProperties": false
+    },
+    "finding_counts": {
+      "type": "object",
+      "properties": {
+        "count_basis": {
+          "const": "stored_finding"
+        },
+        "base": {
+          "$ref": "#/$defs/Counts"
+        },
+        "target": {
+          "$ref": "#/$defs/Counts"
+        }
+      },
+      "required": [
+        "count_basis",
+        "base",
+        "target"
+      ],
+      "additionalProperties": false
+    },
+    "installations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Installation"
+      }
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Item"
+      }
+    },
+    "finding_catalog": {
+      "type": "object",
+      "properties": {
+        "base": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/Finding"
+          }
+        },
+        "target": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/Finding"
+          }
+        }
+      },
+      "required": [
+        "base",
+        "target"
+      ],
+      "additionalProperties": false
+    },
+    "unlinked_findings": {
+      "type": "object",
+      "properties": {
+        "base": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "uniqueItems": true
+        },
+        "target": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "base",
+        "target"
+      ],
+      "additionalProperties": false
+    },
+    "context_changes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ContextChange"
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    }
+  },
+  "required": [
+    "schema_version",
+    "policy_version",
+    "comparison_id",
+    "project",
+    "base",
+    "target",
+    "comparison_complete",
+    "count_basis",
+    "summary",
+    "finding_counts",
+    "installations",
+    "items",
+    "finding_catalog",
+    "unlinked_findings",
+    "context_changes",
+    "warnings"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "Source": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "pending",
+            "running",
+            "completed",
+            "failed",
+            "timeout",
+            "skipped",
+            "unavailable"
+          ]
+        },
+        "tool_run_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tool_version": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "database_version": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "queried_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "tool_run_id",
+        "tool_version",
+        "database_version",
+        "queried_at"
+      ],
+      "additionalProperties": false
+    },
+    "Scan": {
+      "type": "object",
+      "properties": {
+        "scan_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "project_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "status": {
+          "enum": [
+            "completed",
+            "partial",
+            "failed"
+          ]
+        },
+        "result_state": {
+          "enum": [
+            "ready",
+            "partial",
+            "failed",
+            "unavailable"
+          ]
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "finished_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "input_package_lock_sha256": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "snapshot_id": {
+          "type": "string",
+          "pattern": "^compare_input_[0-9a-f]{64}$"
+        },
+        "normalization_fingerprint": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "inventory_complete": {
+          "type": "boolean"
+        },
+        "findings_usable": {
+          "type": "boolean"
+        },
+        "security_complete": {
+          "type": "boolean"
+        },
+        "absence_eligible": {
+          "type": "boolean"
+        },
+        "absence_blockers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "provenance_status": {
+          "enum": [
+            "verified",
+            "legacy_unverified",
+            "unavailable"
+          ]
+        },
+        "sources": {
+          "type": "object",
+          "properties": {
+            "trivy": {
+              "$ref": "#/$defs/Source"
+            },
+            "osv": {
+              "$ref": "#/$defs/Source"
+            }
+          },
+          "required": [
+            "trivy",
+            "osv"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "scan_id",
+        "project_id",
+        "status",
+        "result_state",
+        "created_at",
+        "finished_at",
+        "input_package_lock_sha256",
+        "snapshot_id",
+        "normalization_fingerprint",
+        "inventory_complete",
+        "findings_usable",
+        "security_complete",
+        "absence_eligible",
+        "absence_blockers",
+        "provenance_status",
+        "sources"
+      ],
+      "additionalProperties": false
+    },
+    "InstallationSide": {
+      "type": "object",
+      "properties": {
+        "package_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "lockfile_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "installed_version": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "relationship": {
+          "enum": [
+            "direct",
+            "indirect",
+            "unknown"
+          ]
+        }
+      },
+      "required": [
+        "package_id",
+        "lockfile_path",
+        "installed_version",
+        "relationship"
+      ],
+      "additionalProperties": false
+    },
+    "Installation": {
+      "type": "object",
+      "properties": {
+        "installation_id": {
+          "type": "string",
+          "pattern": "^installation_[0-9a-f]{64}$"
+        },
+        "ecosystem": {
+          "enum": [
+            "npm"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "base": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/InstallationSide"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "target": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/InstallationSide"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "state": {
+          "enum": [
+            "matched",
+            "added",
+            "removed",
+            "not_comparable"
+          ]
+        },
+        "location_match": {
+          "enum": [
+            "exact",
+            "inferred",
+            "base_only",
+            "target_only",
+            "unresolved"
+          ]
+        },
+        "location_evidence": {
+          "enum": [
+            null,
+            "single_remaining_install",
+            "multiple_remaining_installs",
+            "exact_path_version_unknown",
+            "opposite_inventory_incomplete"
+          ]
+        },
+        "version_change": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "same",
+                "changed",
+                "unknown",
+                "not_applicable"
+              ]
+            },
+            "direction": {
+              "enum": [
+                "none",
+                "increased",
+                "decreased",
+                "equivalent",
+                "unknown",
+                "not_applicable"
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "direction"
+          ],
+          "additionalProperties": false
+        },
+        "flags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "installation_id",
+        "ecosystem",
+        "name",
+        "base",
+        "target",
+        "state",
+        "location_match",
+        "location_evidence",
+        "version_change",
+        "flags"
+      ],
+      "additionalProperties": false
+    },
+    "Finding": {
+      "type": "object",
+      "properties": {
+        "finding_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "identifiers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "primary_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "severity": {
+          "enum": [
+            "CRITICAL",
+            "HIGH",
+            "MEDIUM",
+            "LOW",
+            "UNKNOWN"
+          ]
+        },
+        "source_tools": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "trivy",
+              "osv"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "manual_review_required": {
+          "type": "boolean"
+        },
+        "review_reasons": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "merge_identifiers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "reference_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "finding_id",
+        "identifiers",
+        "primary_ids",
+        "severity",
+        "source_tools",
+        "manual_review_required",
+        "review_reasons",
+        "merge_identifiers",
+        "reference_urls"
+      ],
+      "additionalProperties": false
+    },
+    "Edge": {
+      "type": "object",
+      "properties": {
+        "base_finding_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "target_finding_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "basis": {
+          "enum": [
+            "exact_ghsa",
+            "direct_cve",
+            "same_manual_record",
+            "shared_identifier_review",
+            "reference_review_only"
+          ]
+        },
+        "identifiers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "base_finding_id",
+        "target_finding_id",
+        "basis",
+        "identifiers"
+      ],
+      "additionalProperties": false
+    },
+    "Match": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "enum": [
+            "exact_ghsa",
+            "direct_cve",
+            "same_manual_record",
+            "none",
+            "ambiguous"
+          ]
+        },
+        "identifiers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "candidate_edges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Edge"
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "identifiers",
+        "candidate_edges"
+      ],
+      "additionalProperties": false
+    },
+    "Item": {
+      "type": "object",
+      "properties": {
+        "item_id": {
+          "type": "string",
+          "pattern": "^item_[0-9a-f]{64}$"
+        },
+        "installation_id": {
+          "type": "string",
+          "pattern": "^installation_[0-9a-f]{64}$"
+        },
+        "unit": {
+          "enum": [
+            "installation_finding",
+            "identifier_conflict"
+          ]
+        },
+        "status": {
+          "enum": [
+            "new",
+            "not_detected",
+            "persisting",
+            "not_comparable"
+          ]
+        },
+        "reason": {
+          "enum": [
+            "matched_identity",
+            "package_added",
+            "package_removed",
+            "version_changed",
+            "same_version",
+            "version_unknown",
+            "identifier_review_required",
+            "identifier_missing",
+            "base_incomplete",
+            "target_incomplete",
+            "base_unlinked_findings",
+            "target_unlinked_findings"
+          ]
+        },
+        "base_finding_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "uniqueItems": true
+        },
+        "target_finding_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "uniqueItems": true
+        },
+        "match": {
+          "$ref": "#/$defs/Match"
+        },
+        "flags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "item_id",
+        "installation_id",
+        "unit",
+        "status",
+        "reason",
+        "base_finding_ids",
+        "target_finding_ids",
+        "match",
+        "flags"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "unit": {
+                "const": "installation_finding"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "base_finding_ids": {
+                "maxItems": 1
+              },
+              "target_finding_ids": {
+                "maxItems": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "not_comparable"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "reason": {
+                "enum": [
+                  "version_unknown",
+                  "identifier_review_required",
+                  "identifier_missing",
+                  "base_incomplete",
+                  "target_incomplete",
+                  "base_unlinked_findings",
+                  "target_unlinked_findings"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "persisting"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "base_finding_ids": {
+                "minItems": 1,
+                "maxItems": 1
+              },
+              "target_finding_ids": {
+                "minItems": 1,
+                "maxItems": 1
+              },
+              "unit": {
+                "const": "installation_finding"
+              },
+              "reason": {
+                "const": "matched_identity"
+              },
+              "match": {
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "exact_ghsa",
+                      "direct_cve",
+                      "same_manual_record"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "new"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "base_finding_ids": {
+                "maxItems": 0
+              },
+              "target_finding_ids": {
+                "minItems": 1,
+                "maxItems": 1
+              },
+              "reason": {
+                "enum": [
+                  "package_added",
+                  "version_changed",
+                  "same_version"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "not_detected"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "base_finding_ids": {
+                "minItems": 1,
+                "maxItems": 1
+              },
+              "target_finding_ids": {
+                "maxItems": 0
+              },
+              "reason": {
+                "enum": [
+                  "package_removed",
+                  "version_changed",
+                  "same_version"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "unit": {
+                "const": "identifier_conflict"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "status": {
+                "const": "not_comparable"
+              },
+              "reason": {
+                "const": "identifier_review_required"
+              },
+              "match": {
+                "properties": {
+                  "kind": {
+                    "const": "ambiguous"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "Counts": {
+      "type": "object",
+      "properties": {
+        "stored": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "linked": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "unlinked": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "stored",
+        "linked",
+        "unlinked"
+      ],
+      "additionalProperties": false
+    },
+    "ContextChange": {
+      "type": "object",
+      "properties": {
+        "tool": {
+          "enum": [
+            "trivy",
+            "osv"
+          ]
+        },
+        "field": {
+          "enum": [
+            "tool_version",
+            "database_version"
+          ]
+        },
+        "base": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "target": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "state": {
+          "enum": [
+            "same",
+            "changed",
+            "unknown"
+          ]
+        }
+      },
+      "required": [
+        "tool",
+        "field",
+        "base",
+        "target",
+        "state"
+      ],
+      "additionalProperties": false
+    }
+  }
+}
